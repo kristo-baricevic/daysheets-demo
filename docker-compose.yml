@@ -13,8 +13,6 @@ services:
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
-    ports:
-      - "8000:8000"
     environment:
       DB_NAME: daysheets
       DB_USER: daysheets
@@ -23,6 +21,7 @@ services:
       DB_PORT: 5432
     depends_on:
       - db
+
 
 volumes:
   pgdata:
