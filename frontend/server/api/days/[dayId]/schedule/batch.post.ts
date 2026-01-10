@@ -1,5 +1,5 @@
 import { defineEventHandler, getRouterParam, readBody } from "h3"
-import { ScheduleEvent } from "../../../../../types/app"
+import type { ScheduleEvent } from "../../../../../types/app"
 import { db } from "../../../../db";
 
 export default defineEventHandler(async (event) => {

@@ -1,6 +1,6 @@
 // server/db.ts
 
-import { Contact, Day, Group, Note, Person, ScheduleEvent, Tour, Venue } from "../types/app";
+import type { Contact, Day, Group, Note, Person, ScheduleEvent, Tour, Venue } from "../types/app";
 
 const tours: Tour[] = [
   { id: "1", name: "Boxer Brigade", subtitle: "World Tour: West Coast" },

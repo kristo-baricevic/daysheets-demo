@@ -1,6 +1,6 @@
 
 import { defineEventHandler, getRouterParam, readBody  } from "h3"
-import { Person } from "../../../../types/app";
+import type { Person } from "../../../../types/app";
 import { db } from "../../../db";
 
 export default defineEventHandler(async (event) => {

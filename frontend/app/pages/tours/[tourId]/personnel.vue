@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import type { Group, Person } from "~/types/app";
+import { useRoute } from "vue-router";
 
 definePageMeta({ layout: "app" });
 

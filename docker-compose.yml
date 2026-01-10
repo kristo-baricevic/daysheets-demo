@@ -6,9 +6,23 @@ services:
       POSTGRES_USER: daysheets
       POSTGRES_PASSWORD: daysheets
     ports:
-      - "5432:5432"
+      - "55432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DB_NAME: daysheets
+      DB_USER: daysheets
+      DB_PASSWORD: daysheets
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      - db
 
 volumes:
   pgdata:

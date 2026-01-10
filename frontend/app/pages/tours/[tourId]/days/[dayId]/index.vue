@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import type { Day, Group, Person, ScheduleEvent } from "~/types/app";
+import { useRoute } from "vue-router";
 
 definePageMeta({ layout: "app" });
 

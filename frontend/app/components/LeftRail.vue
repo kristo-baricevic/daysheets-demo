@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import type { Day, Tour } from "~/types/app";
+import { useRoute } from "vue-router";
 
 const leftCollapsed = useLeftCollapsed();
 const route = useRoute();

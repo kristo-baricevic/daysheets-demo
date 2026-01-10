@@ -2,6 +2,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: "app" });
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
