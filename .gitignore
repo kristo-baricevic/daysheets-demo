@@ -1,0 +1,39 @@
+# -----------------------
+# OS / Editor
+# -----------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# -----------------------
+# Env / Secrets
+# -----------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------
+# Python / Django
+# -----------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtualenvs
+.venv/
+venv/
+ENV
