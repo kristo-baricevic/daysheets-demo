@@ -13,7 +13,7 @@
 
       <div class="content">
         <header class="pageHeader">
-          <div class="ph-center" v-if="activeDay">
+          <div v-if="isDayPage && activeDay" class="ph-center">
             <div class="ctxMain">
               {{ `${activeDay.city}${activeDay.state ? ", " + activeDay.state : ""}` }}
             </div>
@@ -29,6 +29,16 @@
             </div>
 
             <button class="btn secondary filterBtn" type="button">Filter</button>
+          </div>
+
+          <div v-else-if="isPersonnelPage" class="titleRow">
+            <div class="title">Personnel</div>
+            <div class="subtitle">{{ activeTour?.subtitle ?? "" }}</div>
+          </div>
+
+          <div v-else class="titleRow">
+            <div class="title">{{ activeTour?.name ?? "Tour" }}</div>
+            <div class="subtitle">{{ activeTour?.subtitle ?? "" }}</div>
           </div>
 
           <div class="ph-right">
@@ -72,6 +82,11 @@ watch(
 
 const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value));
 const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
+
+const isDayPage = computed(() => route.path.includes(`/tours/${tourId.value}/days/`));
+const isPersonnelPage = computed(() =>
+  route.path.includes(`/tours/${tourId.value}/personnel`)
+);
 
 const labelDayType = (t: Day["dayType"]) => {
   if (t === "show") return "Show Day";
@@ -197,6 +212,31 @@ const labelDayType = (t: Day["dayType"]) => {
   grid-column: 3;
   grid-row: 1 / span 2;
   align-self: center;
+}
+
+.titleRow {
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 16px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ph-right {

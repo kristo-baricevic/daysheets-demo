@@ -1,8 +1,7 @@
 <template>
   <aside class="left" :class="{ collapsed: isCompact }">
-    <div class="ph-left">
-      <div class="bandAvatar">🎸</div>
-
+    <div class="tourHead">
+      <div class="tourAvatar" aria-hidden="true">🎸</div>
       <div v-if="!isCompact" class="bandMeta">
         <div class="bandName">{{ activeTour?.name ?? "" }}</div>
         <div class="tourName">{{ activeTour?.subtitle ?? "" }}</div>
@@ -64,10 +63,6 @@
         :class="{ active: String(route.params.dayId) === d.id }"
         @click="goDay(d.id)"
       >
-        <div v-if="!isCompact" class="dayLeft">
-          <div class="checkCircle">✓</div>
-        </div>
-
         <div v-if="!isCompact" class="dayMain">
           <div class="dayTitle">{{ d.dateISO }}</div>
           <div class="dayLine">{{ labelDayType(d.dayType) }}</div>
@@ -79,6 +74,17 @@
         </div>
       </button>
     </div>
+
+    <div class="collapseFooter">
+      <button
+        class="collapseBtn"
+        type="button"
+        @click="toggleLeftCollapsed"
+        :aria-label="leftCollapsed ? 'Expand left rail' : 'Collapse left rail'"
+      >
+        <span aria-hidden="true">{{ leftCollapsed ? "»" : "«" }}</span>
+      </button>
+    </div>
   </aside>
 </template>
 
@@ -87,14 +93,16 @@ import type { Day, Tour } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 const leftCollapsed = useLeftCollapsed();
+
+const toggleLeftCollapsed = () => {
+  leftCollapsed.value = !leftCollapsed.value;
+};
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
-const dayId = computed(() => String(route.params.dayId || ""));
 
+const dayId = computed(() => String(route.params.dayId || ""));
 const tourId = computed(() => String(route.params.tourId || "1"));
-const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value));
-const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
 
 const tours = ref<Tour[]>([]);
 onMounted(async () => {
@@ -111,6 +119,8 @@ watch(
 );
 
 const days = computed<Day[]>(() => daysData.value ?? []);
+const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value));
+const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
 
 const scheduleLink = computed(() => {
   const firstDay = days.value[0]?.id;
@@ -123,7 +133,7 @@ const personnelLink = computed(() => `/tours/${tourId.value}/personnel`);
 const isScheduleActive = computed(() => route.path.includes(`/tours/${tourId.value}/days/`));
 const isPersonnelActive = computed(() => route.path.includes(`/tours/${tourId.value}/personnel`));
 
-const goDay = (dayId: string) => router.push(`/tours/${tourId.value}/days/${dayId}`);
+const goDay = (id: string) => router.push(`/tours/${tourId.value}/days/${id}`);
 
 const labelDayType = (t: Day["dayType"]) => {
   if (t === "show") return "Show Day";
@@ -150,9 +160,6 @@ const compactDate = (s: string) => {
   const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (iso) return `${iso[2]}/${iso[3]}`;
 
-  const slash = s.match(/^(\d{2})\/(\d{2})$/);
-  if (slash) return `${slash[1]}/${slash[2]}`;
-
   const anySlash = s.match(/(\d{2})\/(\d{2})/);
   if (anySlash) return `${anySlash[1]}/${anySlash[2]}`;
 
@@ -165,7 +172,7 @@ const goToday = () => {
   const dd = String(now.getDate()).padStart(2, "0");
   const key = `${mm}/${dd}`;
 
-  const match = days.value.find((d) => (d.dateISO || "").includes(key));
+  const match = days.value.find((d) => compactDate(d.dateISO) === key || (d.dateISO || "").includes(key));
   const target = match?.id ?? days.value[0]?.id;
   if (target) goDay(target);
 };
@@ -189,15 +196,6 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
 </script>
 
 <style scoped>
-.ph-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  padding-left: 18px;
-  padding-top: 10px;
-}
-
 .left {
   width: 320px;
   border-right: 1px solid var(--border);
@@ -212,16 +210,20 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   width: 76px;
 }
 
-/* band avatar */
-.bandAvatar {
-  width: 34px;
-  height: 34px;
+.tourHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 8px 16px;
+}
+
+.tourAvatar {
+  width: 36px;
+  height: 36px;
   border-radius: 12px;
-  background: #eef2ff;
+  background: rgba(148, 163, 184, 0.18);
   display: grid;
   place-items: center;
-  font-size: 22px;
-  color: #2563eb;
   flex: 0 0 auto;
 }
 
@@ -231,6 +233,9 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
 
 .bandName {
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tourName {
@@ -238,17 +243,13 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   color: var(--muted);
   line-height: 1.1;
   margin-top: 2px;
-}
-
-/* compact: show only avatar */
-.left.collapsed .ph-left {
-  padding-left: 0;
-  padding-top: 10px;
-  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .top {
-  padding: 12px 0;
+  padding: 8px 0 12px 0;
 }
 
 .nav {
@@ -375,9 +376,6 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   text-align: left;
   cursor: pointer;
   padding: 18px 16px;
-  display: flex;
-  gap: 14px;
-  align-items: center;
   position: relative;
   border-top: 1px solid var(--border);
 }
@@ -398,25 +396,6 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   bottom: 0;
   width: 4px;
   background: #3b82f6;
-}
-
-.dayLeft {
-  flex: 0 0 auto;
-}
-
-.checkCircle {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  background: #2563eb;
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-}
-
-.dayMain {
-  min-width: 0;
 }
 
 .dayTitle {
@@ -447,5 +426,32 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.left.collapsed .tourHead {
+  justify-content: center;
+  padding: 12px 0 8px 0;
+}
+
+.collapseFooter {
+  border-top: 1px solid var(--border);
+  padding: 10px 6px;
+  display: flex;
+  justify-content: right;
+  background: #ffffff;
+}
+
+.collapseBtn {
+  width: 44px;
+  height: 36px;
+  border: 0px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 32px;
 }
 </style>

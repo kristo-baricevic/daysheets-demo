@@ -1,22 +1,59 @@
 <template>
   <div class="page">
-    <div class="page-header">
-      <div class="title">Personnel</div>
-      <div class="actions">
-        <button class="btn" @click="openAdd">Add personnel</button>
+    <div class="tabsBar">
+      <div class="tabs">
+        <button
+          class="tab"
+          :class="{ active: tab === 'overview' }"
+          type="button"
+          @click="setTab('overview')"
+        >
+          Overview
+        </button>
+        <button
+          class="tab"
+          :class="{ active: tab === 'groups' }"
+          type="button"
+          @click="setTab('groups')"
+        >
+          Groups
+        </button>
+        <button
+          class="tab"
+          :class="{ active: tab === 'permissions' }"
+          type="button"
+          @click="setTab('permissions')"
+        >
+          Permissions
+        </button>
+        <button
+          class="tab"
+          :class="{ active: tab === 'travel' }"
+          type="button"
+          @click="setTab('travel')"
+        >
+          Travel Profiles
+        </button>
       </div>
+
+     
     </div>
 
-    <ThreeColumnShell
-      :showRight="showRight"
-      :rightCollapsed="rightCollapsed"
-      @toggleRight="rightCollapsed = !rightCollapsed"
-    >
+    <ThreeColumnShell :showRight="showRight">
       <template #middle>
         <PersonnelTable
+          v-if="tab !== 'groups'"
           :people="people"
           :groups="groups"
-          @selectPerson="openEdit"
+          @selectPerson="openEditPerson"
+        />
+
+        <GroupsTable
+          v-else
+          :groups="groups"
+          :people="people"
+          @create="openAddGroup"
+          @selectGroup="openEditGroup"
         />
       </template>
 
@@ -26,13 +63,21 @@
 
       <template #right>
         <PersonnelRightPanel
-          v-if="showRight"
+          v-if="rightKind === 'person'"
           :mode="panelMode as 'add' | 'edit'"
           :groups="groups"
           :person="activePerson ?? undefined"
           @close="closePanel"
           @saved="refreshAll"
           @deleted="refreshAll"
+        />
+
+        <GroupRightPanel
+          v-else-if="rightKind === 'group'"
+          :mode="groupPanelMode"
+          :group="activeGroup ?? undefined"
+          @close="closePanel"
+          @saved="closePanel"
         />
       </template>
     </ThreeColumnShell>
@@ -51,7 +96,6 @@ const router = useRouter();
 const api = useApi();
 
 const tourId = computed(() => String(route.params.tourId));
-const rightCollapsed = ref(false);
 
 type PersonnelPayload = { people: AppPerson[]; groups: AppGroup[] };
 
@@ -67,8 +111,11 @@ const { data: personnelData, refresh: refreshPersonnel } = useAsyncData<Personne
 const people = computed<AppPerson[]>(() => personnelData.value?.people ?? []);
 const groups = computed<AppGroup[]>(() => personnelData.value?.groups ?? []);
 
+const tab = computed(() => String(route.query.tab ?? "overview"));
+
 const panel = computed(() => String(route.query.panel ?? ""));
 const personId = computed(() => String(route.query.personId ?? ""));
+const groupId = computed(() => String(route.query.groupId ?? ""));
 
 const panelMode = computed<"add" | "edit" | "closed">(() => {
   if (panel.value === "add") return "add";
@@ -76,33 +123,72 @@ const panelMode = computed<"add" | "edit" | "closed">(() => {
   return "closed";
 });
 
-const showRight = computed(() => panelMode.value !== "closed");
+const groupPanelMode = computed<"add" | "edit">(() => {
+  if (panel.value === "addGroup") return "add";
+  return "edit";
+});
+
+const rightKind = computed<"none" | "person" | "group">(() => {
+  if (panel.value === "add") return "person";
+  if (personId.value) return "person";
+  if (panel.value === "addGroup") return "group";
+  if (groupId.value) return "group";
+  return "none";
+});
+
+const showRight = computed(() => rightKind.value !== "none");
 
 const activePerson = computed<AppPerson | null>(() => {
   if (!personId.value) return null;
   return people.value.find((p) => p.id === personId.value) ?? null;
 });
 
+const activeGroup = computed<AppGroup | null>(() => {
+  if (!groupId.value) return null;
+  return groups.value.find((g) => g.id === groupId.value) ?? null;
+});
+
 const rightTitle = computed(() => {
-  if (panelMode.value === "add") return "Add New Personnel";
-  if (panelMode.value === "edit") return "Edit Personnel";
+  if (rightKind.value === "person") {
+    if (panelMode.value === "add") return "Add New Personnel";
+    if (panelMode.value === "edit") return "Edit Personnel";
+  }
+  if (rightKind.value === "group") {
+    if (panel.value === "addGroup") return "Create Group";
+    if (groupId.value) return "Edit Group";
+  }
   return "";
 });
 
-const openAdd = () =>
-  router.push({ query: { ...route.query, panel: "add", personId: undefined } });
+const setTab = (t: string) => {
+  router.push({ query: { ...route.query, tab: t } });
+};
 
-const openEdit = (id: string) =>
-  router.push({ query: { ...route.query, personId: id, panel: undefined } });
+const openAddPerson = () =>
+  router.push({ query: { ...route.query, panel: "add", personId: undefined, groupId: undefined } });
 
-const closePanel = () => router.push({ query: {} });
+const openEditPerson = (id: string) =>
+  router.push({ query: { ...route.query, personId: id, panel: undefined, groupId: undefined } });
+
+const openAddGroup = () =>
+  router.push({ query: { ...route.query, panel: "addGroup", groupId: undefined, personId: undefined, tab: "groups" } });
+
+const openEditGroup = (id: string) =>
+  router.push({ query: { ...route.query, groupId: id, panel: undefined, personId: undefined, tab: "groups" } });
+
+const closePanel = () => {
+  const q = { ...route.query };
+  delete q.panel;
+  delete q.personId;
+  delete q.groupId;
+  router.push({ query: q });
+};
 
 const refreshAll = async () => {
   await refreshPersonnel();
   closePanel();
 };
 </script>
-
 
 <style scoped>
 .page {
@@ -111,18 +197,50 @@ const refreshAll = async () => {
   flex-direction: column;
   min-height: 0;
 }
-.page-header {
-  padding: 14px 14px 0 14px;
+
+.tabsBar {
+  padding: 10px 14px 0 14px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
+  gap: 14px;
 }
-.title {
-  font-size: 18px;
-  font-weight: 700;
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid var(--border);
+  flex: 1;
+  min-width: 0;
 }
-.actions {
+
+.tab {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 12px 0;
+  color: rgba(71, 85, 105, 0.95);
+  position: relative;
+}
+
+.tab.active {
+  color: #2563eb;
+}
+
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #2563eb;
+}
+
+.tabsActions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 </style>
