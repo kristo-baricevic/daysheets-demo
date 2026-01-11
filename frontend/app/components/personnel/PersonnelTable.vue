@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Group, Person } from "~/types/app";
+import type { Group, Person } from "~~/types/app";
 
 const props = defineProps<{ people: Person[]; groups: Group[] }>();
 defineEmits<{ (e: "selectPerson", id: string): void }>();

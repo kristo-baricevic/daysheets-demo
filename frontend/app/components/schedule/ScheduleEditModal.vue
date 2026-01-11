@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Association, Group, Person, ScheduleEvent } from "~/types/app";
+import type { Association, Group, Person, ScheduleEvent } from "~~/types/app";
 
 const props = defineProps<{
   dayId: string;
@@ -151,19 +151,22 @@ const removeRow = (_key: string) => {
 const addAssoc = (_key: string) => {
   const v = assocPick.value[_key];
   if (!v) return;
-  const [type, id] = v.split(":");
+
+  const [rawType, rawId] = v.split(":");
+  if ((rawType !== "group" && rawType !== "person") || !rawId) return;
+
   const row = draft.value.find((r) => r._key === _key);
   if (!row) return;
 
   const assoc: Association =
-    type === "group" ? { type: "group", id } : { type: "person", id };
-  const exists = row.associations.some(
-    (a) => a.type === assoc.type && a.id === assoc.id
-  );
+    rawType === "group" ? { type: "group", id: rawId } : { type: "person", id: rawId };
+
+  const exists = row.associations.some((a) => a.type === assoc.type && a.id === assoc.id);
   if (!exists) row.associations.push(assoc);
 
   assocPick.value[_key] = "";
 };
+
 
 const removeAssoc = (_key: string, idx: number) => {
   const row = draft.value.find((r) => r._key === _key);
@@ -201,7 +204,7 @@ const save = async () => {
     if (!keptIds.has(id)) del.push(id);
   }
 
-  await api.saveScheduleBatch(props.dayId, { create, update, delete: del });
+  await api.batchUpdateDaySchedule(props.dayId, { create, update, delete: del });
   emit("saved");
 };
 </script>

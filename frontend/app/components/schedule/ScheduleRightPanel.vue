@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DayContext } from "~/types/app";
+import type { DayContext } from "~~/types/app";
 defineProps<{ context: DayContext }>();
 </script>
 

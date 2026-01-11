@@ -40,8 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Group, Person } from "~~/types/app";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
+import type { Group as AppGroup, Person as AppPerson } from "~~/types/app";
 
 definePageMeta({ layout: "app" });
 
@@ -50,23 +51,21 @@ const router = useRouter();
 const api = useApi();
 
 const tourId = computed(() => String(route.params.tourId));
-
 const rightCollapsed = ref(false);
 
-import { ref, computed, onMounted } from "vue";
+type PersonnelPayload = { people: AppPerson[]; groups: AppGroup[] };
 
-const { data: personnelData, refresh: refreshPersonnel } = useAsyncData(
+const { data: personnelData, refresh: refreshPersonnel } = useAsyncData<PersonnelPayload>(
   () => `personnel:${tourId.value}`,
-  () => api.getTourPersonnel(tourId.value),
+  () => api.getTourPersonnel(tourId.value) as Promise<PersonnelPayload>,
   {
     watch: [tourId],
-    default: () => ({ people: [], groups: [] } as { people: Person[]; groups: Group[] })
+    default: () => ({ people: [], groups: [] })
   }
 );
 
-
-const people = computed(() => personnelData.value?.people ?? []);
-const groups = computed(() => personnelData.value?.groups ?? []);
+const people = computed<AppPerson[]>(() => personnelData.value?.people ?? []);
+const groups = computed<AppGroup[]>(() => personnelData.value?.groups ?? []);
 
 const panel = computed(() => String(route.query.panel ?? ""));
 const personId = computed(() => String(route.query.personId ?? ""));
@@ -79,10 +78,9 @@ const panelMode = computed<"add" | "edit" | "closed">(() => {
 
 const showRight = computed(() => panelMode.value !== "closed");
 
-const activePerson = computed<Person | null>(() => {
-  if (!personId.value || !people.value) return null;
-  const typedPeople = people.value as Person[];
-  return typedPeople.find((p) => p.id === personId.value) ?? null;
+const activePerson = computed<AppPerson | null>(() => {
+  if (!personId.value) return null;
+  return people.value.find((p) => p.id === personId.value) ?? null;
 });
 
 const rightTitle = computed(() => {
@@ -103,8 +101,8 @@ const refreshAll = async () => {
   await refreshPersonnel();
   closePanel();
 };
-
 </script>
+
 
 <style scoped>
 .page {

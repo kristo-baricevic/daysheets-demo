@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ScheduleEvent } from "~/types/app";
+import type { ScheduleEvent } from "~~/types/app";
 
 const props = defineProps<{ events: ScheduleEvent[] }>();
 
@@ -30,6 +30,7 @@ const sorted = computed(() => {
 
 const formatTime = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map((n) => Number(n));
+  if (!h) return;
   const ampm = h >= 12 ? "PM" : "AM";
   const hr = ((h + 11) % 12) + 1;
   const mm = String(m).padStart(2, "0");
