@@ -1,14 +1,10 @@
 :root {
-  /* --bg: #ffffff; */
-  --panel: #ffffff;
-  --panel2: #f8fafc;
   --border: rgba(148, 163, 184, 0.18);
   --text: #000000;
   --muted: rgba(45, 45, 45, 0.72);
   --accent: #3b82f6;
 }
 #appRoot {
-  background: var(--panel); /* solid */
   min-height: 100vh;
 }
 

@@ -5,19 +5,8 @@
     </section>
 
     <section
-      v-if="showRight"
       class="right"
-      :class="{ collapsed: rightCollapsed }"
     >
-      <div class="right-header">
-        <div class="right-title">
-          <slot name="rightTitle" />
-        </div>
-        <button class="btn secondary" @click="$emit('toggleRight')">
-          {{ rightCollapsed ? "Expand" : "Collapse" }}
-        </button>
-      </div>
-
       <div class="right-body" v-if="!rightCollapsed">
         <slot name="right" />
       </div>
@@ -53,8 +42,6 @@ defineEmits<{
 
 .right {
   width: 420px;
-  border-left: 1px solid var(--border);
-  background: rgba(148, 163, 184, 0.06);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -70,7 +57,6 @@ defineEmits<{
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-bottom: 1px solid var(--border);
 }
 
 .right-body {
@@ -97,7 +83,6 @@ defineEmits<{
   .right {
     width: 100%;
     border-left: 0;
-    border-top: 1px solid var(--border);
     min-height: 0;
   }
 

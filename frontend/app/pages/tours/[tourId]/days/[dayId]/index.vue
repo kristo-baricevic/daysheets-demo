@@ -1,14 +1,5 @@
 <template>
   <div class="page">
-    <!-- <div class="page-header">
-      <div>
-        <div class="title">{{ headerTitle }}</div>
-        <div class="subtitle">{{ headerSubtitle }}</div>
-      </div>
-      <div class="actions">
-        <button class="btn secondary" @click="editOpen = true">Edit</button>
-      </div>
-    </div> -->
 
     <ThreeColumnShell
       :showRight="true"
@@ -18,8 +9,6 @@
       <template #middle>
         <ScheduleList :events="events" />
       </template>
-
-      <template #rightTitle> Day Context </template>
 
       <template #right>
         <ScheduleRightPanel v-if="context" :context="context" />
@@ -93,20 +82,6 @@ const headerTitle = computed(() => {
   const d = activeDay.value;
   if (!d) return "Schedule";
   return `${d.city}${d.state ? ", " + d.state : ""}`;
-});
-
-const headerSubtitle = computed(() => {
-  const d = activeDay.value;
-  if (!d) return "";
-  const type =
-    d.dayType === "show"
-      ? "Show Day"
-      : d.dayType === "travel"
-      ? "Travel Day"
-      : d.dayType === "off"
-      ? "Day Off"
-      : "Rehearsal";
-  return `${type} · ${d.dateISO}`;
 });
 
 const handleSaved = async () => {
