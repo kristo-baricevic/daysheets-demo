@@ -214,8 +214,8 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
 
 /* band avatar */
 .bandAvatar {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   border-radius: 12px;
   background: #eef2ff;
   display: grid;
