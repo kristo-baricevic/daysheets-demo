@@ -10,7 +10,7 @@
 
     <header class="pageHeader">
       <div class="ph-left">
-        <img class="bandAvatar" src="/Users/kristo/daysheets-demo/frontend/public/band.jpg" />
+        <!-- <img class="bandAvatar" src="/Users/kristo/daysheets-demo/frontend/public/band.jpg" /> -->
         <div class="bandMeta">
           <div class="bandName">{{ activeTour?.name ?? "" }}</div>
           <div class="tourName">{{ activeTour?.subtitle ?? "" }}</div>
