@@ -69,3 +69,7 @@ a {
   color: var(--text);
   font-size: 12px;
 }
+
+.day-date {
+  color: var(--muted);
+}

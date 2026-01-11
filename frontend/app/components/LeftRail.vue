@@ -1,6 +1,6 @@
 <template>
-  <aside class="left" :class="{ collapsed: leftCollapsed.value }">
-    <div class="left-inner" v-if="!leftCollapsed.value">
+  <aside class="left" :class="{ collapsed: leftCollapsed }">
+    <div class="left-inner" v-if="!leftCollapsed">
       <div class="section">
         <div class="tour-header">
           <div>
@@ -43,7 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Day, Tour } from "~/types/app";
+
+import type { Day, Tour } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 const leftCollapsed = useLeftCollapsed();
@@ -53,16 +54,22 @@ const api = useApi();
 
 const tourId = computed(() => String(route.params.tourId || "1"));
 
-const { data: tours } = await useAsyncData("tours", () => api.getTours());
+const tours = ref<Tour[]>([]);
+
+onMounted(async () => {
+  const result = await api.getTours();
+  tours.value = result;
+});
+
 const activeTour = computed<Tour | undefined>(() =>
   tours.value?.find((t) => t.id === tourId.value)
 );
 
-const { data: daysData } = await useAsyncData(
-  () => `days:${tourId.value}`,
-  () => api.getTourDays(tourId.value),
-  { watch: [tourId] }
-);
+const daysData = ref<Day[]>([]);
+
+onMounted(async () => {
+  daysData.value = await api.getTourDays(tourId.value);
+});
 
 const days = computed<Day[]>(() => daysData.value ?? []);
 

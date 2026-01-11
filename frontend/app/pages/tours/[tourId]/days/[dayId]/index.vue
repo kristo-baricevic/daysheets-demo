@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Day, Group, Person, ScheduleEvent } from "~/types/app";
+import type { Day, Group, Person, ScheduleEvent } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 definePageMeta({ layout: "app" });
@@ -53,39 +53,41 @@ const dayId = computed(() => String(route.params.dayId));
 const rightCollapsed = ref(false);
 const editOpen = ref(false);
 
-const { data: days } = await useAsyncData(
+const { data: days } = useAsyncData(
   () => `days:${tourId.value}`,
   () => api.getTourDays(tourId.value),
   { watch: [tourId] }
 );
 
+
 const activeDay = computed<Day | undefined>(() =>
   (days.value ?? []).find((d) => d.id === dayId.value)
 );
 
-const { data: eventsData, refresh: refreshEvents } = await useAsyncData(
+const { data: eventsData, refresh: refreshEvents } = useAsyncData(
   () => `schedule:${dayId.value}`,
-  () => api.getSchedule(dayId.value),
+  () => api.getDaySchedule(dayId.value),
   { watch: [dayId] }
 );
 
-const { data: contextData, refresh: refreshContext } = await useAsyncData(
+const { data: contextData, refresh: refreshContext } = useAsyncData(
   () => `context:${dayId.value}`,
   () => api.getDayContext(dayId.value),
   { watch: [dayId] }
 );
 
-const { data: personnelData } = await useAsyncData(
+const { data: personnelData } = useAsyncData(
   () => `personnel:${tourId.value}`,
-  () => api.getPersonnel(tourId.value),
+  () => api.getTourPersonnel(tourId.value),
   { watch: [tourId] }
 );
 
-const events = computed<ScheduleEvent[]>(() => eventsData.value ?? []);
+const events = computed<ScheduleEvent[]>(() => (eventsData.value ?? []) as ScheduleEvent[]);
 const context = computed(() => contextData.value ?? null);
 
-const groups = computed<Group[]>(() => personnelData.value?.groups ?? []);
-const people = computed<Person[]>(() => personnelData.value?.people ?? []);
+const groups = computed<Group[]>(() => (personnelData.value?.groups ?? []) as Group[]);
+const people = computed<Person[]>(() => (personnelData.value?.people ?? []) as Person[]);
+
 
 const headerTitle = computed(() => {
   const d = activeDay.value;

@@ -73,7 +73,7 @@ const days = ref([
   { id: "d2", dateISO: "2026-01-11", city: "Boston", state: "MA" },
 ]);
 
-const selectedDayId = ref(days.value[0].id);
+const selectedDayId = ref(days.value?.[0]?.id ?? "1");
 
 const venueName = ref("Madison Square Garden");
 

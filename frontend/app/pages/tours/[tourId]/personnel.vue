@@ -27,9 +27,9 @@
       <template #right>
         <PersonnelRightPanel
           v-if="showRight"
-          :mode="panelMode"
+          :mode="panelMode as 'add' | 'edit'"
           :groups="groups"
-          :person="activePerson"
+          :person="activePerson ?? undefined"
           @close="closePanel"
           @saved="refreshAll"
           @deleted="refreshAll"
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Group, Person } from "~/types/app";
+import type { Group, Person } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 definePageMeta({ layout: "app" });
@@ -53,14 +53,20 @@ const tourId = computed(() => String(route.params.tourId));
 
 const rightCollapsed = ref(false);
 
-const { data: personnelData, refresh } = await useAsyncData(
+import { ref, computed, onMounted } from "vue";
+
+const { data: personnelData, refresh: refreshPersonnel } = useAsyncData(
   () => `personnel:${tourId.value}`,
-  () => api.getPersonnel(tourId.value),
-  { watch: [tourId] }
+  () => api.getTourPersonnel(tourId.value),
+  {
+    watch: [tourId],
+    default: () => ({ people: [], groups: [] } as { people: Person[]; groups: Group[] })
+  }
 );
 
-const people = computed<Person[]>(() => personnelData.value?.people ?? []);
-const groups = computed<Group[]>(() => personnelData.value?.groups ?? []);
+
+const people = computed(() => personnelData.value?.people ?? []);
+const groups = computed(() => personnelData.value?.groups ?? []);
 
 const panel = computed(() => String(route.query.panel ?? ""));
 const personId = computed(() => String(route.query.personId ?? ""));
@@ -74,8 +80,9 @@ const panelMode = computed<"add" | "edit" | "closed">(() => {
 const showRight = computed(() => panelMode.value !== "closed");
 
 const activePerson = computed<Person | null>(() => {
-  if (!personId.value) return null;
-  return people.value.find((p) => p.id === personId.value) ?? null;
+  if (!personId.value || !people.value) return null;
+  const typedPeople = people.value as Person[];
+  return typedPeople.find((p) => p.id === personId.value) ?? null;
 });
 
 const rightTitle = computed(() => {
@@ -93,9 +100,10 @@ const openEdit = (id: string) =>
 const closePanel = () => router.push({ query: {} });
 
 const refreshAll = async () => {
-  await refresh();
+  await refreshPersonnel();
   closePanel();
 };
+
 </script>
 
 <style scoped>

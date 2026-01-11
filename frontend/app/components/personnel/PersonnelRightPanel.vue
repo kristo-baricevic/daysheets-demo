@@ -63,14 +63,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Group, Person } from "~/types/app";
+import type { Group, Person } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 const props = defineProps<{
-  mode: "add" | "edit";
-  groups: Group[];
-  person: Person | null;
+  mode: 'add' | 'edit' | 'closed'
+  groups: Group[]
+  person?: Person
 }>();
+
 
 const emit = defineEmits<{
   (e: "close"): void;

@@ -1,13 +1,20 @@
 <script setup lang="ts">
-const api = useApi();
-const tours = await api.getTours();
-const firstTourId = tours[0]?.id;
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-if (firstTourId) {
-  await navigateTo(`/tours/${firstTourId}`);
-}
+const api = useApi();
+const router = useRouter();
+
+onMounted(async () => {
+  const tours = await api.getTours();
+  const firstTourId = tours[0]?.id;
+
+  if (firstTourId) {
+    router.replace(`/tours/${firstTourId}`);
+  }
+});
 </script>
 
 <template>
-  <div />
+  <div></div>
 </template>
