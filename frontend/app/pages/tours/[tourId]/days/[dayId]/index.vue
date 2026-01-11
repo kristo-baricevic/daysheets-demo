@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <div class="page-header">
+    <!-- <div class="page-header">
       <div>
         <div class="title">{{ headerTitle }}</div>
         <div class="subtitle">{{ headerSubtitle }}</div>
@@ -8,7 +8,7 @@
       <div class="actions">
         <button class="btn secondary" @click="editOpen = true">Edit</button>
       </div>
-    </div>
+    </div> -->
 
     <ThreeColumnShell
       :showRight="true"
