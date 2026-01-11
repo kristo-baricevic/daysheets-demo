@@ -31,7 +31,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
     "64.225.3.60",
-    "disposable-api.net"
+    "api.disposable-api.net"
 ]
 
 
