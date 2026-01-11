@@ -1,5 +1,14 @@
 <template>
   <aside class="left" :class="{ collapsed: isCompact }">
+    <div class="ph-left">
+      <div class="bandAvatar">🎸</div>
+
+      <div v-if="!isCompact" class="bandMeta">
+        <div class="bandName">{{ activeTour?.name ?? "" }}</div>
+        <div class="tourName">{{ activeTour?.subtitle ?? "" }}</div>
+      </div>
+    </div>
+
     <div class="top">
       <nav class="nav">
         <NuxtLink class="navRow" :to="scheduleLink" :class="{ active: isScheduleActive }">
@@ -81,8 +90,11 @@ const leftCollapsed = useLeftCollapsed();
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const dayId = computed(() => String(route.params.dayId || ""));
 
 const tourId = computed(() => String(route.params.tourId || "1"));
+const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value));
+const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
 
 const tours = ref<Tour[]>([]);
 onMounted(async () => {
@@ -177,6 +189,15 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
 </script>
 
 <style scoped>
+.ph-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 18px;
+  padding-top: 10px;
+}
+
 .left {
   width: 320px;
   border-right: 1px solid var(--border);
@@ -189,6 +210,41 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
 
 .left.collapsed {
   width: 76px;
+}
+
+/* band avatar */
+.bandAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eef2ff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: #2563eb;
+  flex: 0 0 auto;
+}
+
+.bandMeta {
+  min-width: 0;
+}
+
+.bandName {
+  line-height: 1.1;
+}
+
+.tourName {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* compact: show only avatar */
+.left.collapsed .ph-left {
+  padding-left: 0;
+  padding-top: 10px;
+  justify-content: center;
 }
 
 .top {

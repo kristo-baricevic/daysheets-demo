@@ -8,40 +8,39 @@
       </div>
     </header>
 
-    <header class="pageHeader">
-      <div class="ph-left">
-        <!-- <img class="bandAvatar" src="/Users/kristo/daysheets-demo/frontend/public/band.jpg" /> -->
-        <div class="bandMeta">
-          <div class="bandName">{{ activeTour?.name ?? "" }}</div>
-          <div class="tourName">{{ activeTour?.subtitle ?? "" }}</div>
-        </div>
-      </div>
-
-      <div class="ph-center">
-        <div class="ctxMain">
-          {{
-            activeDay
-              ? `${activeDay.city}${activeDay.state ? ", " + activeDay.state : ""}`
-              : ""
-          }}
-        </div>
-        <div class="ctxMeta" v-if="activeDay">
-          {{ labelDayType(activeDay.dayType) }} · {{ activeDay.dateISO }}
-        </div>
-        <button class="btn secondary" type="button">Filter</button>
-      </div>
-
-      <div class="ph-right">
-        <button class="iconBtn" type="button">+</button>
-        <button class="iconBtn" type="button">⋯</button>
-      </div>
-    </header>
-
-    <div class="body">
+    <div class="work">
       <LeftRail />
-      <main class="main">
-        <slot />
-      </main>
+
+      <div class="content">
+        <header class="pageHeader">
+          <div class="ph-center" v-if="activeDay">
+            <div class="ctxMain">
+              {{ `${activeDay.city}${activeDay.state ? ", " + activeDay.state : ""}` }}
+            </div>
+            <div class="ctxSub">
+              {{ `${activeDay.city}${activeDay.state ? ", " + activeDay.state : ""}` }}
+            </div>
+
+            <div class="metaLine">
+              {{ labelDayType(activeDay.dayType) }}
+            </div>
+            <div class="metaLine">
+              {{ activeDay.dateISO }}
+            </div>
+
+            <button class="btn secondary filterBtn" type="button">Filter</button>
+          </div>
+
+          <div class="ph-right">
+            <button class="iconBtnDark" type="button">+</button>
+            <button class="iconBtnDark" type="button">⋯</button>
+          </div>
+        </header>
+
+        <main class="main">
+          <slot />
+        </main>
+      </div>
     </div>
   </div>
 </template>
@@ -89,6 +88,7 @@ const labelDayType = (t: Day["dayType"]) => {
   flex-direction: column;
 }
 
+/* TOP BAR */
 .topbar {
   height: 56px;
   display: flex;
@@ -116,18 +116,31 @@ const labelDayType = (t: Day["dayType"]) => {
   cursor: pointer;
 }
 
-.userBtn {
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
+.badge {
   color: #ffffff;
-  cursor: pointer;
 }
 
+/* BELOW TOP BAR: LEFT RAIL + CONTENT */
+.work {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SECONDARY HEADER (STARTS TO THE RIGHT OF LEFT RAIL) */
 .pageHeader {
   height: 56px;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   padding: 0 16px;
   background: #ffffff;
@@ -135,57 +148,55 @@ const labelDayType = (t: Day["dayType"]) => {
   min-width: 0;
 }
 
-.ph-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.bandAvatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: #e5e7eb;
-  flex: 0 0 auto;
-}
-
-.bandMeta {
-  min-width: 0;
-}
-
-.bandName {
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-.tourName {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.1;
-  margin-top: 2px;
-}
-
 .ph-center {
-  justify-self: center;
-  display: flex;
+  justify-self: start;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 18px;
+  row-gap: 2px;
   align-items: center;
-  gap: 14px;
   min-width: 0;
 }
 
 .ctxMain {
-  font-weight: 600;
+  grid-column: 1;
+  grid-row: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 420px;
 }
 
-.ctxMeta {
+.ctxSub {
+  grid-column: 1;
+  grid-row: 2;
   font-size: 13px;
   color: var(--muted);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+
+.metaLine {
+  grid-column: 2;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.metaLine:nth-of-type(3) {
+  grid-row: 1;
+}
+
+.metaLine:nth-of-type(4) {
+  grid-row: 2;
+}
+
+.filterBtn {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
 }
 
 .ph-right {
@@ -194,16 +205,19 @@ const labelDayType = (t: Day["dayType"]) => {
   gap: 8px;
 }
 
-.body {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-  overflow: hidden;
+.iconBtnDark {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
 }
 
+/* MAIN */
 .main {
   flex: 1;
-  min-width: 0;
   min-height: 0;
   overflow: auto;
 }
