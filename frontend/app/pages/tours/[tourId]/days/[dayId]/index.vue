@@ -7,7 +7,12 @@
     >
       <template #middle>
         <div class="middleStack">
-          <ScheduleList :events="visibleEvents" @edit="editOpen = true" @add="openAdd" />
+          <ScheduleList
+            :events="visibleEvents"
+            :groups="groups"
+            @edit="editOpen = true"
+            @add="openAdd"
+          />
         </div>
       </template>
 

@@ -38,7 +38,13 @@
           </div>
         </div>
 
-        <div v-if="badgeFor(e)" class="chip">{{ badgeFor(e) }}</div>
+        <div v-if="groupsForEvent(e).length" class="groupCell">
+          <template v-for="g in groupsForEvent(e)" :key="g.id">
+            <span class="groupBadge" :style="badgeStyleForGroup(g)" :title="g.name">
+              {{ groupInitial(g) }}
+            </span>
+          </template>
+        </div>
       </div>
 
       <div class="aftershowRow">
@@ -59,10 +65,12 @@
 <script setup lang="ts">
 import type { ScheduleEvent } from "~~/types/app";
 
-
 defineEmits<{ (e: "edit"): void; (e: "add"): void }>();
 
-const props = defineProps<{ events: ScheduleEvent[] }>();
+const props = defineProps<{
+  events: ScheduleEvent[];
+  groups: Group[];
+}>();
 
 const sorted = computed(() => {
   return [...props.events].sort((a, b) =>
@@ -112,6 +120,37 @@ const formatTime = (hhmm: string) => {
   const mm = String(m).padStart(2, "0");
   return `${hh}:${mm} ${ampm}`;
 };
+
+const groupsForEvent = (e: ScheduleEvent): Group[] => {
+  const assocs = (e as any).associations ?? [];
+
+  const groupIds = assocs
+    .filter((a: any) => a?.type === "group" && a?.id)
+    .map((a: any) => String(a.id));
+
+  return props.groups.filter((g) => groupIds.includes(g.id));
+};
+
+const groupInitial = (g: Group | null) => g?.name?.trim()?.[0]?.toUpperCase() ?? "";
+
+const palette = {
+  red: { bg: "rgba(248,113,113,.18)", fg: "rgba(185,28,28,.95)" },
+  gold: { bg: "rgba(251,191,36,.18)", fg: "rgba(146,64,14,.95)" },
+  indigo: { bg: "rgba(99,102,241,.18)", fg: "rgba(67,56,202,.95)" },
+  green: { bg: "rgba(34,197,94,.18)", fg: "rgba(22,101,52,.95)" },
+  blue: { bg: "rgba(14,165,233,.18)", fg: "rgba(3,105,161,.95)" },
+  purple: { bg: "rgba(168,85,247,.18)", fg: "rgba(107,33,168,.95)" },
+} as const;
+
+const badgeStyleForGroup = (g: Group | null) => {
+  const k = (g?.color ?? "red") as keyof typeof palette;
+  const p = palette[k] ?? palette.red;
+
+  return {
+    background: p.bg,
+    color: p.fg,
+  };
+};
 </script>
 
 <style scoped>
@@ -121,7 +160,6 @@ const formatTime = (hhmm: string) => {
   border-radius: 14px;
   overflow: hidden;
 }
-
 .cardHead {
   height: 64px;
   display: flex;
@@ -130,7 +168,6 @@ const formatTime = (hhmm: string) => {
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
 }
-
 .cardHeadLeft {
   display: flex;
   align-items: center;
@@ -147,7 +184,6 @@ const formatTime = (hhmm: string) => {
   color: #64748b;
   font-size: 18px;
 }
-
 .cardTitle {
   font-size: 18px;
 }
@@ -157,7 +193,6 @@ const formatTime = (hhmm: string) => {
   align-items: center;
   gap: 12px;
 }
-
 .iconBtn {
   width: 40px;
   height: 40px;
@@ -176,7 +211,6 @@ const formatTime = (hhmm: string) => {
   color: #2563eb;
   font-size: 18px;
 }
-
 .list {
   display: flex;
   flex-direction: column;
@@ -210,19 +244,15 @@ const formatTime = (hhmm: string) => {
   margin-top: 2px;
   /* font-weight: 900; */
 }
-
 .rowIcon.done {
   background: rgba(34, 197, 94, 0.12);
 }
-
 .rowIcon.flight {
   border-color: rgba(34, 197, 94, 0.45);
 }
-
 .rowText {
   min-width: 0;
 }
-
 .name {
   /* font-weight: 800; */
   font-size: 16px;
@@ -231,7 +261,6 @@ const formatTime = (hhmm: string) => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .sub {
   margin-top: 8px;
   color: #64748b;
@@ -242,13 +271,11 @@ const formatTime = (hhmm: string) => {
   text-align: right;
   min-width: 220px;
 }
-
 .timeRange {
   /* font-weight: 800; */
   font-size: 16px;
   letter-spacing: 0.2px;
 }
-
 .tzRow {
   margin-top: 6px;
   display: flex;
@@ -325,5 +352,25 @@ const formatTime = (hhmm: string) => {
   background: #2563eb;
   color: #ffffff;
   /* font-weight: 900; */
+}
+.groupCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.groupBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.groupText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
