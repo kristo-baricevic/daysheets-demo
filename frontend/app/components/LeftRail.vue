@@ -283,7 +283,7 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #3b82f6;
+  background: #3433fa;
 }
 
 .navIcon {
@@ -395,7 +395,7 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #3b82f6;
+  background: #3433fa;
 }
 
 .dayTitle {

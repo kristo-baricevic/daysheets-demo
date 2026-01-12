@@ -110,7 +110,7 @@ const labelDayType = (t: Day["dayType"]) => {
   justify-content: flex-end;
   align-items: center;
   padding: 0 16px;
-  background: #3b82f6;
+  background: #3433fa;
 }
 
 .topbar-right {
