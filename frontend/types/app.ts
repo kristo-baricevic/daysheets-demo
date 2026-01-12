@@ -6,9 +6,7 @@ export type DayType = "show" | "travel" | "off" | "rehearsal";
 
 export type PermissionLevel = "owner" | "edit" | "read";
 
-export type Association =
-  | { type: "group"; id: ID }
-  | { type: "person"; id: ID };
+export type Association = { type: "group"; id: ID } | { type: "person"; id: ID };
 
 export type Tour = {
   id: ID;
@@ -41,7 +39,7 @@ export type ScheduleEvent = {
   dayId: ID;
   name: string;
   startLocal?: string; // "06:00"
-  endLocal?: string;   // "10:30"
+  endLocal?: string; // "10:30"
   status?: "done" | "todo";
   associations: Association[];
   notes?: string;
@@ -68,13 +66,11 @@ export type Note = {
 export type GroupColor = "red" | "gold" | "indigo" | "green" | "blue" | "purple";
 
 export type Group = {
-  id: ID
-  tourId: ID
-  name: string
-  color?: GroupColor
-}
-
-
+  id: ID;
+  tourId: ID;
+  name: string;
+  color?: GroupColor;
+};
 
 export type Person = {
   id: ID;
@@ -122,24 +118,23 @@ export type DayLodging = {
   updated_at: string;
 };
 
-
 export type EditLodging = {
-  id: string
+  id: string;
   hotel: {
-    id: string
-    name: string
-    address1: string
-    city: string
-    state: string
-    postal: string
-    placeId?: string
-    source?: string
-    addressLine: string
-  } | null
-  checkInISO: string
-  checkOutISO: string
-  rooms: number | null
-  notes: string
-  guests: DayLodgingGuest[]
-  updated_at: string
-}
+    id: string;
+    name: string;
+    address1: string;
+    city: string;
+    state: string;
+    postal: string;
+    placeId?: string;
+    source?: string;
+    addressLine: string;
+  } | null;
+  checkInISO: string;
+  checkOutISO: string;
+  rooms: number | null;
+  notes: string;
+  guests: DayLodgingGuest[];
+  updated_at: string;
+};

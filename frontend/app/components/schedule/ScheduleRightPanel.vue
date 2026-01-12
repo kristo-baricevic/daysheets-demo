@@ -20,7 +20,8 @@
             <div class="strong">{{ context.venue?.name ?? "" }}</div>
             <div class="muted">{{ context.venue?.address1 ?? "" }}</div>
             <div class="muted">
-              {{ context.venue?.city ?? "" }}{{ context.venue?.state ? ", " + context.venue.state : "" }}
+              {{ context.venue?.city ?? ""
+              }}{{ context.venue?.state ? ", " + context.venue.state : "" }}
               {{ context.venue?.postal ?? "" }}
             </div>
           </div>
@@ -52,17 +53,22 @@
                   <div v-for="c in lodgingChips" :key="c" class="chip">{{ c }}</div>
 
                   <div class="menuWrap">
-                    <button class="dotsBtn" type="button" @click.stop="lodgingMenuOpen = !lodgingMenuOpen">
+                    <button
+                      class="dotsBtn"
+                      type="button"
+                      @click.stop="lodgingMenuOpen = !lodgingMenuOpen"
+                    >
                       •••
                     </button>
 
                     <div v-if="lodgingMenuOpen" class="menu" @click.stop>
                       <button class="menuItem" type="button" @click="onEditLodging">Edit</button>
-                      <button class="menuItem danger" type="button" @click="onDeleteLodging">Delete</button>
+                      <button class="menuItem danger" type="button" @click="onDeleteLodging">
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
-
               </div>
 
               <div class="muted">{{ lodgingAddress1 }}</div>
@@ -114,7 +120,7 @@
         </div>
 
         <div class="head-right">
-          <div class="headSummary">{{ (context.notes?.length ?? 0) }} Notes</div>
+          <div class="headSummary">{{ context.notes?.length ?? 0 }} Notes</div>
           <div class="chev" :class="{ open: openNotes }">▾</div>
         </div>
       </button>
@@ -150,9 +156,8 @@ const props = defineProps<{ context: DayContext }>();
 const emit = defineEmits<{
   (e: "addLodging"): void;
   (e: "editLodging"): void;
-  (e: "deleteLodging"): void
+  (e: "deleteLodging"): void;
 }>();
-
 
 const openVenue = ref(true);
 const openLodging = ref(true);
@@ -176,42 +181,44 @@ const lodgingCityLine = computed(() => {
   return `${city}${state}${postal}`.trim();
 });
 
-const lodgingMenuOpen = ref(false)
+const lodgingMenuOpen = ref(false);
 
 const onEditLodging = () => {
-  lodgingMenuOpen.value = false
-  emit("editLodging")
-}
+  lodgingMenuOpen.value = false;
+  emit("editLodging");
+};
 
 const onDeleteLodging = () => {
-  lodgingMenuOpen.value = false
-  emit("deleteLodging")
-}
+  lodgingMenuOpen.value = false;
+  emit("deleteLodging");
+};
 
 const onDocClick = () => {
-  lodgingMenuOpen.value = false
-}
+  lodgingMenuOpen.value = false;
+};
 
-onMounted(() => document.addEventListener("click", onDocClick))
-onBeforeUnmount(() => document.removeEventListener("click", onDocClick))
+onMounted(() => document.addEventListener("click", onDocClick));
+onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
-
-
-const lodgingCheckIn = computed(() => lodging.value?.checkInISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkIn ?? "");
-const lodgingCheckOut = computed(() => lodging.value?.checkOutISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkOut ?? "");
+const lodgingCheckIn = computed(
+  () => lodging.value?.checkInISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkIn ?? ""
+);
+const lodgingCheckOut = computed(
+  () => lodging.value?.checkOutISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkOut ?? ""
+);
 const lodgingRooms = computed(() => String(lodging.value?.rooms ?? ""));
 
 const lodgingChips = computed<string[]>(() => {
   const l = lodging.value;
   if (!l) return [];
   if (Array.isArray(l.chips)) return l.chips.filter(Boolean);
-  if (Array.isArray(l.assignees)) return l.assignees.slice(0, 3).map((x: any) => String(x).slice(0, 1).toUpperCase());
+  if (Array.isArray(l.assignees))
+    return l.assignees.slice(0, 3).map((x: any) => String(x).slice(0, 1).toUpperCase());
   return [];
 });
 </script>
 
 <style scoped>
-
 .menuWrap {
   position: relative;
   display: inline-flex;
@@ -255,7 +262,6 @@ const lodgingChips = computed<string[]>(() => {
   background: rgba(37, 99, 235, 0.08);
   color: #1d4ed8;
 }
-
 
 .stack {
   display: flex;

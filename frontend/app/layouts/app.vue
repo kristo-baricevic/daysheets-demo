@@ -84,9 +84,7 @@ const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value)
 const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
 
 const isDayPage = computed(() => route.path.includes(`/tours/${tourId.value}/days/`));
-const isPersonnelPage = computed(() =>
-  route.path.includes(`/tours/${tourId.value}/personnel`)
-);
+const isPersonnelPage = computed(() => route.path.includes(`/tours/${tourId.value}/personnel`));
 
 const labelDayType = (t: Day["dayType"]) => {
   if (t === "show") return "Show Day";

@@ -35,8 +35,6 @@
           Travel Profiles
         </button>
       </div>
-
-     
     </div>
 
     <ThreeColumnShell :showRight="showRight">
@@ -57,7 +55,6 @@
           @selectGroup="openEditGroup"
           @addPersonToGroup="openAddPersonForGroup"
         />
-
       </template>
 
       <template #rightTitle>
@@ -82,7 +79,6 @@
           @close="closePanel"
           @saved="refreshAll"
         />
-        
       </template>
     </ThreeColumnShell>
   </div>
@@ -109,7 +105,7 @@ const { data: personnelData, refresh: refreshPersonnel } = useAsyncData<Personne
   () => api.getTourPersonnel(tourId.value) as Promise<PersonnelPayload>,
   {
     watch: [tourId],
-    default: () => ({ people: [], groups: [] })
+    default: () => ({ people: [], groups: [] }),
   }
 );
 
@@ -129,8 +125,6 @@ const readQueryString = (v: unknown) => {
 
 const personId = computed(() => readQueryString(route.query.personId));
 const groupId = computed(() => readQueryString(route.query.groupId));
-
-
 
 const panelMode = computed<"add" | "edit" | "closed">(() => {
   if (panel.value === "add") return "add";
@@ -213,7 +207,6 @@ const openEditGroup = (id: string) => {
   router.push({ query: q });
 };
 
-
 const closePanel = () => {
   const q = { ...route.query };
   delete q.panel;
@@ -234,7 +227,6 @@ const openAddPersonForGroup = (groupId: string) => {
   delete q.personId;
   router.push({ query: q });
 };
-
 </script>
 
 <style scoped>

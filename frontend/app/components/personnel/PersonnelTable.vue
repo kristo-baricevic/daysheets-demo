@@ -3,20 +3,12 @@
     <div class="toolbar">
       <div class="searchWrap">
         <span class="searchIcon">🔍</span>
-        <input
-          class="searchInput"
-          v-model="q"
-          placeholder="Filter by name, group, or role"
-        />
+        <input class="searchInput" v-model="q" placeholder="Filter by name, group, or role" />
       </div>
 
       <div class="toolbarRight">
-        <button class="btn secondary" type="button" @click="$emit('export')">
-          Export
-        </button>
-        <button class="btn" type="button" @click="$emit('add')">
-          Add personnel
-        </button>
+        <button class="btn secondary" type="button" @click="$emit('export')">Export</button>
+        <button class="btn" type="button" @click="$emit('add')">Add personnel</button>
       </div>
     </div>
 
@@ -44,13 +36,7 @@
         <div>Travel Profile</div>
       </div>
 
-
-      <div
-        v-for="p in filtered"
-        :key="p.id"
-        class="row"
-        @click="$emit('selectPerson', p.id)"
-      >
+      <div v-for="p in filtered" :key="p.id" class="row" @click="$emit('selectPerson', p.id)">
         <label class="chk" @click.stop>
           <input type="checkbox" v-model="checked[p.id]" />
         </label>
@@ -79,7 +65,6 @@
             {{ p.connected ? "Connected" : "Not connected" }}
           </span>
         </div>
-
 
         <div class="mutedCell">-</div>
       </div>
@@ -116,8 +101,7 @@ const coerceColor = (c: unknown): PaletteKey => {
   return palette[k] ? k : "red";
 };
 
-const groupName = (id?: string | null) =>
-  props.groups.find((g) => g.id === id)?.name ?? "";
+const groupName = (id?: string | null) => props.groups.find((g) => g.id === id)?.name ?? "";
 
 const groupInitial = (id?: string | null) => {
   const n = groupName(id).trim();
@@ -239,12 +223,10 @@ const toggleAll = () => {
     1.1fr
     1.4fr
     1fr
-    180px  
-    1fr; 
+    180px
+    1fr;
   gap: 12px;
 }
-
-
 
 .thead {
   align-items: center;
@@ -259,7 +241,6 @@ const toggleAll = () => {
 .row > * {
   min-width: 0;
 }
-
 
 .row {
   padding: 14px 12px;
@@ -361,7 +342,6 @@ const toggleAll = () => {
 .headerCell .spacer {
   visibility: hidden;
 }
-
 
 .statusPill {
   display: inline-flex;
