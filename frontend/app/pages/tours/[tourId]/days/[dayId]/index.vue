@@ -7,7 +7,7 @@
       @toggleRight="rightCollapsed = !rightCollapsed"
     >
       <template #middle>
-        <ScheduleList :events="events" />
+        <ScheduleList :events="events" @edit="editOpen = true" />
       </template>
 
       <template #right>

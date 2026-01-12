@@ -279,27 +279,29 @@
   }
   
   .slider::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    transition: transform 160ms ease;
-  }
-  
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transform: translateY(-50%);
+  transition: transform 160ms ease;
+}
+
+
+
   .switch input:checked + .slider {
     background: rgba(37, 99, 235, 0.75);
     border-color: rgba(37, 99, 235, 0.65);
   }
   
   .switch input:checked + .slider::after {
-    transform: translateX(20px);
-  }
-  
+  transform: translate(20px, -50%);
+}
   .tpChecks {
     border-top: 1px solid var(--border);
     margin-top: 6px;
