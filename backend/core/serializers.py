@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Tour, Day, Venue, ScheduleEvent, Contact, Note, Group, Person, ScheduleTemplate, ScheduleTemplateEvent
+from core.models import Tour, Day, Venue, ScheduleEvent, Contact, Note, Group, Person, ScheduleTemplate, ScheduleTemplateEvent, Hotel, DayLodging, DayLodgingGuest
 
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
@@ -131,3 +131,75 @@ class ScheduleTemplateCreateSerializer(serializers.Serializer):
 
         ScheduleTemplateEvent.objects.bulk_create(rows)
         return template
+
+def _address_line(h: Hotel) -> str:
+    parts = []
+    if h.address1:
+        parts.append(h.address1)
+    city_line = " ".join([p for p in [h.city, h.state] if p]).strip()
+    if city_line:
+        parts.append(city_line)
+    if h.postal:
+        parts.append(h.postal)
+    return ", ".join(parts).strip()
+
+
+class HotelSearchResultSerializer(serializers.ModelSerializer):
+    key = serializers.SerializerMethodField()
+    placeId = serializers.SerializerMethodField()
+    addressLine = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Hotel
+        fields = ["key", "id", "name", "address1", "city", "state", "postal", "placeId", "source", "addressLine"]
+
+    def get_key(self, obj: Hotel) -> str:
+        return f"db:{obj.id}"
+
+    def get_placeId(self, obj: Hotel) -> str:
+        return obj.place_id or ""
+
+    def get_addressLine(self, obj: Hotel) -> str:
+        return _address_line(obj)
+
+
+class DayLodgingGuestSerializer(serializers.ModelSerializer):
+    personId = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DayLodgingGuest
+        fields = ["personId"]
+
+    def get_personId(self, obj: DayLodgingGuest) -> str:
+        return str(obj.person_id)
+
+
+class DayLodgingSerializer(serializers.ModelSerializer):
+    hotel = serializers.SerializerMethodField()
+    checkInISO = serializers.SerializerMethodField()
+    checkOutISO = serializers.SerializerMethodField()
+    guests = DayLodgingGuestSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = DayLodging
+        fields = ["id", "hotel", "checkInISO", "checkOutISO", "rooms", "notes", "guests", "updated_at"]
+
+    def get_hotel(self, obj: DayLodging):
+        h = obj.hotel
+        return {
+            "id": str(h.id),
+            "name": h.name,
+            "address1": h.address1,
+            "city": h.city,
+            "state": h.state,
+            "postal": h.postal,
+            "placeId": h.place_id or "",
+            "source": h.source or "db",
+            "addressLine": _address_line(h),
+        }
+
+    def get_checkInISO(self, obj: DayLodging):
+        return obj.check_in_iso.isoformat().replace("+00:00", "Z") if obj.check_in_iso else ""
+
+    def get_checkOutISO(self, obj: DayLodging):
+        return obj.check_out_iso.isoformat().replace("+00:00", "Z") if obj.check_out_iso else ""

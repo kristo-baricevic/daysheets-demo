@@ -161,3 +161,46 @@ class ScheduleTemplateEvent(models.Model):
 
     start_tz = models.CharField(max_length=64, blank=True, default="")
     end_tz = models.CharField(max_length=64, blank=True, default="")
+
+class Hotel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tour = models.ForeignKey("core.Tour", null=True, blank=True, on_delete=models.SET_NULL, related_name="hotels")
+
+    name = models.CharField(max_length=255)
+    address1 = models.CharField(max_length=255, blank=True, default="")
+    city = models.CharField(max_length=120, blank=True, default="")
+    state = models.CharField(max_length=80, blank=True, default="")
+    postal = models.CharField(max_length=40, blank=True, default="")
+
+    place_id = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    source = models.CharField(max_length=40, blank=True, default="db")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["tour", "name"]),
+            models.Index(fields=["place_id"]),
+        ]
+
+class DayLodging(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    day = models.OneToOneField("core.Day", on_delete=models.CASCADE, related_name="lodging")
+    hotel = models.ForeignKey("core.Hotel", on_delete=models.PROTECT, related_name="day_lodgings")
+
+    check_in_iso = models.DateTimeField(null=True, blank=True)
+    check_out_iso = models.DateTimeField(null=True, blank=True)
+    rooms = models.IntegerField(null=True, blank=True)
+    notes = models.TextField(blank=True, default="")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class DayLodgingGuest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lodging = models.ForeignKey("core.DayLodging", on_delete=models.CASCADE, related_name="guests")
+    person = models.ForeignKey("core.Person", on_delete=models.CASCADE, related_name="lodging_guests")
+
+    class Meta:
+        unique_together = [("lodging", "person")]
+        indexes = [models.Index(fields=["lodging", "person"])]

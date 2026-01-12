@@ -50,8 +50,19 @@
                 <div class="strong truncate">{{ lodgingName }}</div>
                 <div class="chips">
                   <div v-for="c in lodgingChips" :key="c" class="chip">{{ c }}</div>
-                  <button class="dotsBtn" type="button">•••</button>
+
+                  <div class="menuWrap">
+                    <button class="dotsBtn" type="button" @click.stop="lodgingMenuOpen = !lodgingMenuOpen">
+                      •••
+                    </button>
+
+                    <div v-if="lodgingMenuOpen" class="menu" @click.stop>
+                      <button class="menuItem" type="button" @click="onEditLodging">Edit</button>
+                      <button class="menuItem danger" type="button" @click="onDeleteLodging">Delete</button>
+                    </div>
+                  </div>
                 </div>
+
               </div>
 
               <div class="muted">{{ lodgingAddress1 }}</div>
@@ -77,7 +88,7 @@
           </div>
 
           <div class="panelFooter">
-            <button class="addLink" type="button">
+            <button class="addLink" type="button" @click="$emit('addLodging')">
               <span class="plus">+</span>
               <span>Add Lodging</span>
             </button>
@@ -86,7 +97,7 @@
 
         <template v-else>
           <div class="panelFooter">
-            <button class="addLink" type="button">
+            <button class="addLink" type="button" @click="$emit('addLodging')">
               <span class="plus">+</span>
               <span>Add Lodging</span>
             </button>
@@ -136,25 +147,55 @@ import type { DayContext } from "~~/types/app";
 
 const props = defineProps<{ context: DayContext }>();
 
+const emit = defineEmits<{
+  (e: "addLodging"): void;
+  (e: "editLodging"): void;
+  (e: "deleteLodging"): void
+}>();
+
+
 const openVenue = ref(true);
 const openLodging = ref(true);
 const openNotes = ref(true);
+const lodgingHotel = computed(() => lodging.value?.hotel ?? null);
 
 const lodging = computed<any>(() => {
   const c: any = props.context as any;
   return c.lodging ?? (Array.isArray(c.lodgings) ? c.lodgings[0] : null) ?? null;
 });
 
-const lodgingName = computed(() => lodging.value?.name ?? "");
-const lodgingAddress1 = computed(() => lodging.value?.address1 ?? "");
+const lodgingName = computed(() => lodgingHotel.value?.name ?? "");
+const lodgingAddress1 = computed(() => lodgingHotel.value?.address1 ?? "");
+
 const lodgingCityLine = computed(() => {
-  const l = lodging.value;
-  if (!l) return "";
-  const city = l.city ?? "";
-  const state = l.state ? ", " + l.state : "";
-  const postal = l.postal ? " " + l.postal : "";
+  const h = lodgingHotel.value;
+  if (!h) return "";
+  const city = h.city ?? "";
+  const state = h.state ? ", " + h.state : "";
+  const postal = h.postal ? " " + h.postal : "";
   return `${city}${state}${postal}`.trim();
 });
+
+const lodgingMenuOpen = ref(false)
+
+const onEditLodging = () => {
+  lodgingMenuOpen.value = false
+  emit("editLodging")
+}
+
+const onDeleteLodging = () => {
+  lodgingMenuOpen.value = false
+  emit("deleteLodging")
+}
+
+const onDocClick = () => {
+  lodgingMenuOpen.value = false
+}
+
+onMounted(() => document.addEventListener("click", onDocClick))
+onBeforeUnmount(() => document.removeEventListener("click", onDocClick))
+
+
 
 const lodgingCheckIn = computed(() => lodging.value?.checkInISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkIn ?? "");
 const lodgingCheckOut = computed(() => lodging.value?.checkOutISO?.slice(5, 10)?.replace("-", "/") ?? lodging.value?.checkOut ?? "");
@@ -170,6 +211,52 @@ const lodgingChips = computed<string[]>(() => {
 </script>
 
 <style scoped>
+
+.menuWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+  color: #111827;
+}
+
+.menuItem:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+.menuItem.danger {
+  color: #1d4ed8;
+}
+
+.menuItem.danger:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -270,8 +357,8 @@ const lodgingChips = computed<string[]>(() => {
 }
 
 .lodgingTile {
-  background: rgba(239, 68, 68, 0.12);
-  color: rgba(239, 68, 68, 0.95);
+  background: rgba(79, 70, 229, 0.12);
+  color: rgba(79, 70, 229, 0.95);
 }
 
 .itemText {

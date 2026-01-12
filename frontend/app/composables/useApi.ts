@@ -1,5 +1,6 @@
 import { useRuntimeConfig } from "nuxt/app"
 import { $fetch } from "ofetch"
+import type { DayContext } from "~~/types/app";
 
 
 type UUID = string
@@ -73,6 +74,38 @@ export type Person = {
   connected: boolean
 }
 
+export type HotelOption = {
+  key: string
+  id?: string
+  name: string
+  address1?: string
+  city?: string
+  state?: string
+  postal?: string
+  placeId?: string
+  source?: string
+  addressLine: string
+}
+
+export type DayLodging = {
+  id: UUID
+  dayId: UUID
+  hotelId?: UUID | null
+  name: string
+  address1: string
+  city: string
+  state: string
+  postal: string
+  checkInISO: string
+  checkOutISO: string
+  checkInLocal: string | null
+  checkOutLocal: string | null
+  confirmationNumber: string | null
+  notes: string
+  associations: Array<{ type: "group" | "person"; id: UUID }>
+}
+
+
 export const useApi = () => {
   const { public: { apiBase } } = useRuntimeConfig()
 
@@ -102,17 +135,17 @@ export const useApi = () => {
 
   /* Right column context */
   const getDayContext = (dayId: UUID) =>
-    $fetch<{
-      venue: Venue
-      contacts: Contact[]
-      notes: Note[]
-    }>(`${apiBase}/days/${dayId}/context/`)
+    $fetch<DayContext>(`${apiBase}/days/${dayId}/context/`)
 
   /* Personnel */
   const getTourPersonnel = (tourId: UUID) =>
     $fetch<{ groups: Group[]; people: Person[] }>(
       `${apiBase}/tours/${tourId}/personnel/`
     )
+
+  const deleteDayLodging = (dayId: UUID) =>
+    $fetch(`${apiBase}/days/${dayId}/lodging/`, { method: "DELETE" })
+  
 
   const createPerson = (tourId: UUID, payload: Partial<Person>) =>
     $fetch<Person>(
@@ -156,6 +189,24 @@ export const useApi = () => {
     });
   };
   
+  const searchHotels = (tourId: UUID, q: string) =>
+    $fetch(`${apiBase}/hotels/search/`, {
+      params: { q, tourId }
+    })
+  
+
+  const saveDayLodging = (
+    dayId: UUID,
+    payload: Partial<DayLodging> & {
+      hotel?: HotelOption
+      associations?: Array<{ type: "group" | "person"; id: UUID }>
+    }
+  ) =>
+    $fetch<{ ok: boolean; lodging?: DayLodging }>(
+      `${apiBase}/days/${dayId}/lodging/`,
+      { method: "POST", body: payload }
+    )
+
     
 
   return {
@@ -170,6 +221,9 @@ export const useApi = () => {
     deletePerson,
     getTourScheduleTemplates,
     createDayScheduleTemplate,
-    deleteTourScheduleTemplate
+    deleteTourScheduleTemplate,
+    searchHotels,
+    saveDayLodging,
+    deleteDayLodging
   }
 }

@@ -47,7 +47,7 @@
           <div class="caret">▾</div>
         </div>
 
-        <button class="addBtn" type="button">
+        <button class="addBtn" type="button" @click="$emit('add')">
           <span class="plus">+</span>
           <span>Add Event (⌘E)</span>
         </button>
@@ -59,7 +59,8 @@
 <script setup lang="ts">
 import type { ScheduleEvent } from "~~/types/app";
 
-defineEmits<{ (e: "edit"): void }>();
+
+defineEmits<{ (e: "edit"): void; (e: "add"): void }>();
 
 const props = defineProps<{ events: ScheduleEvent[] }>();
 

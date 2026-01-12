@@ -88,4 +88,54 @@ export type DayContext = {
   venue: Venue;
   contacts: Contact[];
   notes: Note[];
+  lodging?: DayLodging | null;
+  lodgings?: DayLodging[];
 };
+export type DayLodgingGuest = {
+  personId: string;
+};
+
+export type Hotel = {
+  id: string;
+  name: string;
+  address1: string;
+  city: string;
+  state: string;
+  postal: string;
+  placeId: string;
+  source: string;
+  addressLine: string;
+};
+
+export type DayLodging = {
+  id: string;
+  hotel: Hotel | null;
+  checkInISO: string;
+  checkOutISO: string;
+  rooms: number | null;
+  notes: string;
+  guests: DayLodgingGuest[];
+  updated_at: string;
+};
+
+
+export type EditLodging = {
+  id: string
+  hotel: {
+    id: string
+    name: string
+    address1: string
+    city: string
+    state: string
+    postal: string
+    placeId?: string
+    source?: string
+    addressLine: string
+  } | null
+  checkInISO: string
+  checkOutISO: string
+  rooms: number | null
+  notes: string
+  guests: DayLodgingGuest[]
+  updated_at: string
+}
