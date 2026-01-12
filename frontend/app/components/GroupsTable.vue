@@ -49,7 +49,13 @@
           <div class="muted">{{ memberCount(g.id) }}</div>
   
           <div class="actionCell">
-            <span class="actionIcon" aria-hidden="true">👤+</span>
+            <span
+              class="actionIcon"
+              aria-hidden="true"
+              @click.stop="$emit('addPersonToGroup', g.id)"
+            >
+              👤+
+            </span>
           </div>
         </button>
       </div>
@@ -67,6 +73,7 @@
   defineEmits<{
     (e: "create"): void;
     (e: "selectGroup", id: string): void;
+    (e: "addPersonToGroup", groupId: string): void;
   }>();
   
   const memberCount = (groupId: string) =>
@@ -154,16 +161,30 @@ const badgeStyle = (color: unknown) => {
   box-shadow: none;
 }
 
-/* optional: keep a clean keyboard focus instead of the browser black outline */
 .row:focus-visible {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
   border-radius: 12px;
 }
 
-  
-  .row:hover {
-    background: #eef2ff;
-  }
+.row:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.actionIcon {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.actionIcon:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
   
   .cbox {
     display: flex;
@@ -219,8 +240,7 @@ const badgeStyle = (color: unknown) => {
     justify-content: flex-end;
   }
   
-  .actionIcon {
-    color: rgba(71, 85, 105, 0.85);
-  }
+ 
+
   </style>
   

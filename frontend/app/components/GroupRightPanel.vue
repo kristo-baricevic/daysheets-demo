@@ -218,6 +218,7 @@ const draft = ref<GroupDraft>({
     background: #ffffff;
     padding: 14px;
     border-radius: 20px;
+    border: 1px solid var(--border);
     gap: 12px;
   }
   

@@ -55,7 +55,9 @@
           :people="people"
           @create="openAddGroup"
           @selectGroup="openEditGroup"
+          @addPersonToGroup="openAddPersonForGroup"
         />
+
       </template>
 
       <template #rightTitle>
@@ -224,6 +226,15 @@ const refreshAll = async () => {
   await refreshPersonnel();
   closePanel();
 };
+
+const openAddPersonForGroup = (groupId: string) => {
+  const q: LocationQueryRaw = { ...route.query };
+  q.panel = "add";
+  q.groupId = groupId;
+  delete q.personId;
+  router.push({ query: q });
+};
+
 </script>
 
 <style scoped>
