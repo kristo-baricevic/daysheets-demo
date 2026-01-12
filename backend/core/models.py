@@ -140,3 +140,24 @@ class Note(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+class ScheduleTemplate(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tour = models.ForeignKey("core.Tour", on_delete=models.CASCADE, related_name="schedule_templates")
+    name = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ScheduleTemplateEvent(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    template = models.ForeignKey(ScheduleTemplate, on_delete=models.CASCADE, related_name="events")
+    order = models.PositiveIntegerField(default=0)
+    name = models.CharField(max_length=255)
+
+    start_local = models.CharField(max_length=5, blank=True, default="")
+    end_local = models.CharField(max_length=5, blank=True, default="")
+
+    notes = models.TextField(blank=True, default="")
+    associations = models.JSONField(default=list, blank=True)
+
+    start_tz = models.CharField(max_length=64, blank=True, default="")
+    end_tz = models.CharField(max_length=64, blank=True, default="")

@@ -3,8 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
-from core.models import Tour, Day, ScheduleEvent, Group, Person
+from rest_framework import generics
+
+from core.models import Tour, Day, ScheduleEvent, Group, Person, ScheduleTemplate
 from core.serializers import (
     TourSerializer,
     DaySerializer,
@@ -15,6 +18,8 @@ from core.serializers import (
     GroupSerializer,
     PersonSerializer,
     PersonWriteSerializer,
+    ScheduleTemplateSerializer,
+    ScheduleTemplateCreateSerializer
 )
 
 
@@ -122,3 +127,29 @@ class DayScheduleBatch(APIView):
             )
 
         return Response({"ok": True})
+
+
+class TourScheduleTemplateList(generics.ListAPIView):
+    serializer_class = ScheduleTemplateSerializer
+
+    def get_queryset(self):
+        tour_id = self.kwargs["tour_id"]
+        return ScheduleTemplate.objects.filter(tour_id=tour_id).order_by("-created_at")
+
+    def delete(self, request, tour_id, template_id):
+        template = get_object_or_404(ScheduleTemplate, id=template_id, tour_id=tour_id)
+        template.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DayScheduleTemplateCreate(generics.CreateAPIView):
+    def post(self, request, *args, **kwargs):
+        day_id = self.kwargs["day_id"]
+        day = Day.objects.select_related("tour").get(id=day_id)
+
+        serializer = ScheduleTemplateCreateSerializer(data=request.data, context={"day": day})
+        serializer.is_valid(raise_exception=True)
+        template = serializer.save()
+
+        out = ScheduleTemplateSerializer(template)
+        return Response(out.data, status=status.HTTP_201_CREATED)

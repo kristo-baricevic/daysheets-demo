@@ -9,4 +9,8 @@ urlpatterns = [
     path("days/<uuid:day_id>/schedule/", views.DayScheduleList.as_view()),
     path("days/<uuid:day_id>/context/", views.DayContext.as_view()),
     path("days/<uuid:day_id>/schedule/batch/", views.DayScheduleBatch.as_view()),
+    path("tours/<uuid:tour_id>/schedule-templates/", views.TourScheduleTemplateList.as_view()),
+    path("days/<uuid:day_id>/schedule-templates/", views.DayScheduleTemplateCreate.as_view()),
+    path("tours/<uuid:tour_id>/schedule-templates/<uuid:template_id>/", views.TourScheduleTemplateList.as_view(),
+),
 ]
