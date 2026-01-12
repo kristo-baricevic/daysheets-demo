@@ -73,12 +73,13 @@
         <div class="mutedCell">{{ p.email ?? "" }}</div>
         <div class="mutedCell">{{ p.phone ?? "" }}</div>
 
-        <div>
+        <div class="statusCell">
           <span class="statusPill" :class="{ on: !!p.connected }">
             <span class="statusDot" :class="{ on: !!p.connected }"></span>
             {{ p.connected ? "Connected" : "Not connected" }}
           </span>
         </div>
+
 
         <div class="mutedCell">-</div>
       </div>
@@ -232,13 +233,21 @@ const toggleAll = () => {
 .thead,
 .row {
   display: grid;
-  grid-template-columns: 44px 1.5fr 1.1fr 1.4fr 1fr 1fr 1fr;
+  grid-template-columns:
+    44px
+    1.5fr
+    1.1fr
+    1.4fr
+    1fr
+    180px  
+    1fr; 
   gap: 12px;
-  align-items: start;
 }
 
 
+
 .thead {
+  align-items: center;
   padding: 12px 12px;
   font-size: 12px;
   color: var(--muted);
@@ -246,11 +255,26 @@ const toggleAll = () => {
   background: #ffffff;
 }
 
+.thead > *,
+.row > * {
+  min-width: 0;
+}
+
+
 .row {
   padding: 14px 12px;
   border-bottom: 1px solid var(--border);
   background: #ffffff;
   cursor: pointer;
+  align-items: flex-start;
+}
+
+.statusCell {
+  min-width: 0;
+}
+
+.row > * {
+  align-self: flex-start;
 }
 
 .row:hover {
