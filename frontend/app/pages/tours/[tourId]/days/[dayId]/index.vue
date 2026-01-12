@@ -21,9 +21,12 @@
       :events="events"
       :groups="groups"
       :people="people"
+      :templates="templates"
       @close="editOpen = false"
       @saved="handleSaved"
+      @templateSaved="refreshTemplates"
     />
+
   </div>
 </template>
 
@@ -32,6 +35,7 @@ import type { Day, Group, Person, ScheduleEvent } from "~~/types/app";
 import { useRoute } from "vue-router";
 
 definePageMeta({ layout: "app" });
+const templates = computed(() => templatesData.value ?? []);
 
 const route = useRoute();
 const api = useApi();
@@ -45,6 +49,12 @@ const editOpen = ref(false);
 const { data: days } = useAsyncData(
   () => `days:${tourId.value}`,
   () => api.getTourDays(tourId.value),
+  { watch: [tourId] }
+);
+
+const { data: templatesData, refresh: refreshTemplates } = useAsyncData(
+  () => `templates:${tourId.value}`,
+  () => api.getTourScheduleTemplates(tourId.value),
   { watch: [tourId] }
 );
 

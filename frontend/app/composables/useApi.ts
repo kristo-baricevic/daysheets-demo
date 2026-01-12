@@ -136,6 +136,28 @@ export const useApi = () => {
       { method: "DELETE" }
     )
 
+  const getTourScheduleTemplates = (tourId: string) => {
+    return $fetch(`${apiBase}/tours/${tourId}/schedule-templates/`);
+  };
+  
+  const createDayScheduleTemplate = (
+    dayId: string,
+    payload: { name: string; events: any[] }
+  ) => {
+    return $fetch(`${apiBase}/days/${dayId}/schedule-templates/`, {
+      method: "POST",
+      body: payload,
+    });
+  };
+
+  const deleteTourScheduleTemplate = (tourId: string, templateId: string) => {
+    return $fetch(`${apiBase}/tours/${tourId}/schedule-templates/${templateId}/`, {
+      method: "DELETE",
+    });
+  };
+  
+    
+
   return {
     getTours,
     getTourDays,
@@ -146,5 +168,8 @@ export const useApi = () => {
     createPerson,
     updatePerson,
     deletePerson,
+    getTourScheduleTemplates,
+    createDayScheduleTemplate,
+    deleteTourScheduleTemplate
   }
 }

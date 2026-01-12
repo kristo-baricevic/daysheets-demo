@@ -179,20 +179,33 @@
               <div>Schedule Name</div>
               <div># of Events</div>
               <div>Created</div>
+              <div></div>
             </div>
 
-            <button
+            <div
               v-for="t in templatesList"
               :key="t.id"
-              type="button"
               class="ttrow"
               :class="{ active: selectedTemplateId === t.id }"
+              role="button"
+              tabindex="0"
               @click="selectedTemplateId = t.id"
+              @keydown.enter="selectedTemplateId = t.id"
             >
               <div class="ttname">{{ t.name }}</div>
               <div class="ttcount">{{ templateEventCount(t) }}</div>
               <div class="ttcreated">{{ templateCreatedLabel(t) }}</div>
-            </button>
+
+              <button
+                class="ttdelete"
+                type="button"
+                aria-label="Delete template"
+                @click.stop="deleteTemplate(t.id)"
+              >
+                🗑
+              </button>
+            </div>
+
 
             <div v-if="templatesList.length === 0" class="empty">
               No templates yet.
@@ -294,6 +307,16 @@
       </div>
     </div>
   </div>
+
+  <SaveScheduleTemplateModal
+    v-if="saveTemplateOpen"
+    :name="templateName"
+    @update:name="templateName = $event"
+    @close="saveTemplateOpen = false"
+    @save="confirmSaveTemplate"
+  />
+
+  
 </template>
 
 <script setup lang="ts">
@@ -322,6 +345,7 @@ const emit = defineEmits<{
   (e: "close"): void;
   (e: "saved"): void;
   (e: "saveTemplate", payload: { name: string; events: Omit<ScheduleEvent, "id">[] }): void;
+  (e: "templateSaved"): void;
 }>();
 
 const api = useApi();
@@ -390,6 +414,17 @@ const removeRow = (_key: string) => {
   draft.value = draft.value.filter((r) => r._key !== _key);
 };
 
+const deleteTemplate = async (templateId: string) => {
+  await api.deleteTourScheduleTemplate(tourId.value, templateId);
+
+  if (selectedTemplateId.value === templateId) {
+    selectedTemplateId.value = "";
+  }
+
+  await refreshTemplates();
+};
+
+
 const addAssoc = (_key: string) => {
   const v = assocPick.value[_key];
   if (!v) return;
@@ -422,6 +457,17 @@ const toggleTBC = (_key: string) => {
   row.endLocal = "";
 };
 
+const hhmm = (v?: string) => {
+  if (!v) return undefined;
+  const s = String(v).trim();
+  const m = s.match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return undefined;
+  const h = m[1]?.padStart(2, "0");
+  const mm = m[2];
+  return `${h}:${mm}`;
+};
+
+
 const save = async () => {
   const create: any[] = [];
   const update: any[] = [];
@@ -432,8 +478,8 @@ const save = async () => {
     const payloadBase: any = {
       dayId: props.dayId,
       name: r.name.trim(),
-      startLocal: r.startLocal || undefined,
-      endLocal: r.endLocal || undefined,
+      startLocal: hhmm(r.startLocal),
+      endLocal: hhmm(r.endLocal),
       status: "todo" as const,
       associations: r.associations ?? [],
       notes: r.notes ?? "",
@@ -459,23 +505,32 @@ const save = async () => {
 };
 
 const saveAsTemplate = () => {
-  const name = (window.prompt("Template name") ?? "").trim();
+  templateName.value = "";
+  saveTemplateOpen.value = true;
+};
+
+const confirmSaveTemplate = async () => {
+  const name = templateName.value.trim();
   if (!name) return;
 
-  const templateEvents: any[] = draft.value.map((r) => ({
+  const events = draft.value.map((r) => ({
     dayId: props.dayId,
     name: r.name.trim(),
-    startLocal: r.startLocal || undefined,
-    endLocal: r.endLocal || undefined,
+    startLocal: hhmm(r.startLocal),
+    endLocal: hhmm(r.endLocal),
     status: "todo" as const,
     associations: r.associations ?? [],
     notes: r.notes ?? "",
     startTz: r.startTz || undefined,
-    endTz: r.endTz || r.startTz || undefined,
+    endTz: (r.endTz || r.startTz) || undefined,
   }));
 
-  emit("saveTemplate", { name, events: templateEvents as any });
+  await api.createDayScheduleTemplate(props.dayId, { name, events });
+
+  saveTemplateOpen.value = false;
+  emit("templateSaved");
 };
+
 
 const templatesList = computed<ScheduleTemplateLike[]>(() => props.templates ?? []);
 
@@ -495,8 +550,18 @@ const templateEventCount = (t: ScheduleTemplateLike) => {
 
 const templateCreatedLabel = (t: ScheduleTemplateLike) => {
   const raw = t.createdAt ?? t.created_at ?? t.created ?? "";
-  return raw || "—";
+  if (!raw) return "—";
+
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "—";
+
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 };
+
 
 const templatePreviewEvents = (t: ScheduleTemplateLike) => {
   return Array.isArray(t.events) ? t.events : [];
@@ -539,6 +604,9 @@ const tzStartTz = ref("America/New_York");
 const tzEndTz = ref("America/New_York");
 const tzSplit = ref(false);
 const tzSearch = ref("");
+const saveTemplateOpen = ref(false);
+const templateName = ref("");
+
 
 const tzOptions = computed(() => {
   const base = [
@@ -596,6 +664,19 @@ const applyTz = () => {
 
   closeTz();
 };
+
+const route = useRoute();
+const tourId = computed(() => String(route.params.tourId));
+
+
+const { data: templatesData, refresh: refreshTemplates } = useAsyncData(
+  () => `templates:${tourId.value}`,
+  () => api.getTourScheduleTemplates(tourId.value),
+  { watch: [tourId] }
+);
+
+const templates = computed(() => templatesData.value ?? []);
+
 </script>
 
 <style scoped>
@@ -990,7 +1071,7 @@ const applyTz = () => {
 
 .tthead {
   display: grid;
-  grid-template-columns: 1.4fr 0.6fr 0.8fr;
+  grid-template-columns: 1.4fr 0.6fr 0.8fr 56px;
   gap: 12px;
   padding: 14px;
   color: #6b7280;
@@ -1005,13 +1086,25 @@ const applyTz = () => {
   background: transparent;
   cursor: pointer;
   display: grid;
-  grid-template-columns: 1.4fr 0.6fr 0.8fr;
+  grid-template-columns: 1.4fr 0.6fr 0.8fr 56px;
+  align-items: center;
   gap: 12px;
   padding: 14px;
   text-align: left;
   border-top: 1px solid var(--border);
   color: #111827;
 }
+
+.ttdelete {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
+  justify-self: end;
+}
+
 
 .ttrow.active {
   background: rgba(37, 99, 235, 0.08);
