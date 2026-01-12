@@ -65,12 +65,16 @@ export type Note = {
   lastEditedAtISO: string;
 };
 
+export type GroupColor = "red" | "gold" | "indigo" | "green" | "blue" | "purple";
+
 export type Group = {
-  id: ID;
-  tourId: ID;
-  name: string;
-  color?: string;
-};
+  id: ID
+  tourId: ID
+  name: string
+  color?: GroupColor
+}
+
+
 
 export type Person = {
   id: ID;

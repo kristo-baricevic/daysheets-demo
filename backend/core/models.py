@@ -54,8 +54,9 @@ class Day(models.Model):
 
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="groups")
-    name = models.CharField(max_length=128)
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    color = models.CharField(max_length=32, default="red")
 
     class Meta:
         unique_together = [("tour", "name")]

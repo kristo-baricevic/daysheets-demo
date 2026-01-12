@@ -60,8 +60,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "tourId", "name"]
-
+        fields = ["id", "tourId", "name", "color"]
 
 class PersonSerializer(serializers.ModelSerializer):
     tourId = serializers.UUIDField(source="tour_id", read_only=True)

@@ -137,18 +137,36 @@
   
   const oneLetter = (s: string) => (s.trim()?.[0] ?? "").toUpperCase();
   
-  const draft = ref({
-    name: props.group?.name ?? "",
-    initials: oneLetter(props.group?.name ?? ""),
-    color: "indigo",
-    permissions: "read",
-    visibility: "events",
-    travelEnabled: true,
-    passport: false,
-    travelInfo: true,
-    dietary: true,
-    emergency: true,
-  });
+  const api = useApi();
+  const route = useRoute();
+  const tourId = computed(() => String(route.params.tourId));
+
+  type GroupDraft = {
+    name: string;
+    initials: string;
+    color: GroupColor;
+    permissions: "read" | "edit" | "owner";
+    visibility: "events" | "all";
+    travelEnabled: boolean;
+    passport: boolean;
+    travelInfo: boolean;
+    dietary: boolean;
+    emergency: boolean;
+  };
+
+const draft = ref<GroupDraft>({
+  name: props.group?.name ?? "",
+  initials: oneLetter(props.group?.name ?? ""),
+  color: (props.group?.color ?? "indigo") as GroupColor,
+  permissions: "read",
+  visibility: "events",
+  travelEnabled: true,
+  passport: false,
+  travelInfo: true,
+  dietary: true,
+  emergency: true,
+});
+
   
   watch(
     () => draft.value.name,
@@ -156,7 +174,7 @@
       draft.value.initials = oneLetter(n);
     }
   );
-  
+
   watch(
     () => props.group,
     (g) => {
@@ -165,22 +183,41 @@
       draft.value.initials = oneLetter(g.name ?? "");
     }
   );
-  
-  const save = () => {
+
+  const save = async () => {
+    const payload = {
+      name: draft.value.name.trim(),
+      color: draft.value.color,
+    };
+
+    if (props.mode === "add") {
+      await api.createTourGroup(tourId.value, payload);
+    } else {
+      if (!props.group?.id) return;
+      await api.updateTourGroup(tourId.value, props.group.id, payload);
+    }
+
     emit("saved");
   };
-  
-  const saveAndAnother = () => {
+
+  const saveAndAnother = async () => {
+    const payload = { name: draft.value.name.trim(), color: draft.value.color };
+    await api.createTourGroup(tourId.value, payload);
+
     emit("saved");
     draft.value.name = "";
     draft.value.initials = "";
   };
+
   </script>
   
   <style scoped>
   .panel {
     display: flex;
     flex-direction: column;
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 20px;
     gap: 12px;
   }
   

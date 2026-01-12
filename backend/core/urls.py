@@ -6,6 +6,8 @@ urlpatterns = [
     path("tours/<uuid:tour_id>/days/", views.TourDaysList.as_view()),
     path("tours/<uuid:tour_id>/personnel/", views.TourPersonnel.as_view()),
     path("tours/<uuid:tour_id>/personnel/<uuid:person_id>/", views.TourPersonnelDetail.as_view()),
+    path("tours/<uuid:tour_id>/groups/", views.TourGroups.as_view()),
+    path("tours/<uuid:tour_id>/groups/<uuid:group_id>/", views.TourGroupsDetail.as_view()),
     path("days/<uuid:day_id>/schedule/", views.DayScheduleList.as_view()),
     path("days/<uuid:day_id>/context/", views.DayContext.as_view()),
     path("days/<uuid:day_id>/schedule/batch/", views.DayScheduleBatch.as_view()),

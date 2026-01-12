@@ -46,6 +46,7 @@
           :people="people"
           :groups="groups"
           @selectPerson="openEditPerson"
+          @add="openAddPerson"
         />
 
         <GroupsTable
@@ -77,8 +78,9 @@
           :mode="groupPanelMode"
           :group="activeGroup ?? undefined"
           @close="closePanel"
-          @saved="closePanel"
+          @saved="refreshAll"
         />
+        
       </template>
     </ThreeColumnShell>
   </div>
@@ -88,6 +90,7 @@
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import type { Group as AppGroup, Person as AppPerson } from "~~/types/app";
+import type { LocationQueryRaw } from "vue-router";
 
 definePageMeta({ layout: "app" });
 
@@ -114,8 +117,18 @@ const groups = computed<AppGroup[]>(() => personnelData.value?.groups ?? []);
 const tab = computed(() => String(route.query.tab ?? "overview"));
 
 const panel = computed(() => String(route.query.panel ?? ""));
-const personId = computed(() => String(route.query.personId ?? ""));
-const groupId = computed(() => String(route.query.groupId ?? ""));
+const readQueryString = (v: unknown) => {
+  if (Array.isArray(v)) v = v[0];
+  if (v == null) return "";
+  const s = String(v);
+  if (s === "undefined" || s === "null") return "";
+  return s;
+};
+
+const personId = computed(() => readQueryString(route.query.personId));
+const groupId = computed(() => readQueryString(route.query.groupId));
+
+
 
 const panelMode = computed<"add" | "edit" | "closed">(() => {
   if (panel.value === "add") return "add";
@@ -164,17 +177,40 @@ const setTab = (t: string) => {
   router.push({ query: { ...route.query, tab: t } });
 };
 
-const openAddPerson = () =>
-  router.push({ query: { ...route.query, panel: "add", personId: undefined, groupId: undefined } });
+const openAddPerson = () => {
+  const q: LocationQueryRaw = { ...route.query };
+  q.panel = "add";
+  delete q.personId;
+  delete q.groupId;
+  router.push({ query: q });
+};
 
-const openEditPerson = (id: string) =>
-  router.push({ query: { ...route.query, personId: id, panel: undefined, groupId: undefined } });
+const openEditPerson = (id: string) => {
+  const q: LocationQueryRaw = { ...route.query };
+  q.personId = id;
+  delete q.panel;
+  delete q.groupId;
+  router.push({ query: q });
+};
 
-const openAddGroup = () =>
-  router.push({ query: { ...route.query, panel: "addGroup", groupId: undefined, personId: undefined, tab: "groups" } });
+const openAddGroup = () => {
+  const q: LocationQueryRaw = { ...route.query };
+  q.tab = "groups";
+  q.panel = "addGroup";
+  delete q.groupId;
+  delete q.personId;
+  router.push({ query: q });
+};
 
-const openEditGroup = (id: string) =>
-  router.push({ query: { ...route.query, groupId: id, panel: undefined, personId: undefined, tab: "groups" } });
+const openEditGroup = (id: string) => {
+  const q: LocationQueryRaw = { ...route.query };
+  q.tab = "groups";
+  q.groupId = id;
+  delete q.panel;
+  delete q.personId;
+  router.push({ query: q });
+};
+
 
 const closePanel = () => {
   const q = { ...route.query };

@@ -29,7 +29,7 @@
           </div>
   
           <div class="groupCell">
-            <div class="groupBadge" :style="{ background: badgeBg(g.id), color: badgeFg(g.id) }">
+            <div class="groupBadge" :style="badgeStyle(g.color)">
               {{ groupLetter(g.name) }}
             </div>
             <div class="groupName">{{ g.name }}</div>
@@ -40,7 +40,7 @@
           <div class="muted">Read Only</div>
   
           <div class="visibility">
-            <div class="groupBadge tiny" :style="{ background: badgeBg(g.id), color: badgeFg(g.id) }">
+            <div class="groupBadge tiny" :style="badgeStyle(g.color)">
               {{ groupLetter(g.name) }}
             </div>
             <div class="muted">{{ g.name }} Events &amp; Reservations</div>
@@ -74,28 +74,26 @@
   
   const groupLetter = (name: string) => (name.trim()?.[0] ?? "").toUpperCase();
   
-  const palette = [
-    { bg: "rgba(248, 113, 113, 0.18)", fg: "rgba(185, 28, 28, 0.95)" },
-    { bg: "rgba(251, 191, 36, 0.18)", fg: "rgba(146, 64, 14, 0.95)" },
-    { bg: "rgba(99, 102, 241, 0.18)", fg: "rgba(67, 56, 202, 0.95)" },
-    { bg: "rgba(34, 197, 94, 0.18)", fg: "rgba(22, 101, 52, 0.95)" },
-    { bg: "rgba(14, 165, 233, 0.18)", fg: "rgba(3, 105, 161, 0.95)" },
-    { bg: "rgba(168, 85, 247, 0.18)", fg: "rgba(107, 33, 168, 0.95)" },
-  ];
-  
-  const hash = (s: string) => {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-    return h;
-  };
-  
-  const getPalette = (id: string) => {
-    const idx = hash(id) % palette.length;
-    return palette[idx] ?? palette[0];
-    };
+  const palette = {
+    red: { bg: "rgba(248, 113, 113, 0.18)", fg: "rgba(185, 28, 28, 0.95)" },
+    gold: { bg: "rgba(251, 191, 36, 0.18)", fg: "rgba(146, 64, 14, 0.95)" },
+    indigo: { bg: "rgba(99, 102, 241, 0.18)", fg: "rgba(67, 56, 202, 0.95)" },
+    green: { bg: "rgba(34, 197, 94, 0.18)", fg: "rgba(22, 101, 52, 0.95)" },
+    blue: { bg: "rgba(14, 165, 233, 0.18)", fg: "rgba(3, 105, 161, 0.95)" },
+    purple: { bg: "rgba(168, 85, 247, 0.18)", fg: "rgba(107, 33, 168, 0.95)" },
+  } as const;
 
-    const badgeBg = (id: string) => getPalette(id)?.bg;
-    const badgeFg = (id: string) => getPalette(id)?.fg;
+  type PaletteKey = keyof typeof palette;
+
+const coerceColor = (c: unknown): PaletteKey => {
+  const k = (c ?? "red") as PaletteKey;
+  return palette[k] ? k : "red";
+};
+
+const badgeStyle = (color: unknown) => {
+  const k = coerceColor(color);
+  return { background: palette[k].bg, color: palette[k].fg };
+};
 
   </script>
   

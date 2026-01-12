@@ -353,3 +353,41 @@ class SaveDayLodgingView(APIView):
         day = Day.objects.get(id=day_id)
         DayLodging.objects.filter(day=day).delete()
         return Response({"ok": True}, status=status.HTTP_200_OK)
+
+
+class TourGroups(APIView):
+    def get(self, request, tour_id):
+        groups = Group.objects.filter(tour_id=tour_id).order_by("name")
+        return Response(GroupSerializer(groups, many=True).data)
+
+    def post(self, request, tour_id):
+        name = (request.data.get("name") or "").strip()
+        if not name:
+            return Response({"detail": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        group = Group.objects.create(tour_id=tour_id, name=name)
+        return Response(GroupSerializer(group).data, status=status.HTTP_201_CREATED)
+
+
+class TourGroupsDetail(APIView):
+    def put(self, request, tour_id, group_id):
+        group = Group.objects.get(id=group_id, tour_id=tour_id)
+
+        name = request.data.get("name")
+        color = request.data.get("color")
+
+        if name is not None:
+            name = name.strip()
+            if not name:
+                return Response({"detail": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+            group.name = name
+
+        if color is not None:
+            group.color = (color or "red").strip() or "red"
+
+        group.save()
+        return Response(GroupSerializer(group).data)
+
+    def delete(self, request, tour_id, group_id):
+        Group.objects.filter(id=group_id, tour_id=tour_id).delete()
+        return Response({"ok": True})

@@ -56,10 +56,13 @@ export type Note = {
   lastEditedAtISO: string
 }
 
+export type GroupColor = "red" | "gold" | "indigo" | "green" | "blue" | "purple";
+
 export type Group = {
   id: UUID
   tourId: UUID
   name: string
+  color?: GroupColor
 }
 
 export type Person = {
@@ -207,6 +210,24 @@ export const useApi = () => {
       { method: "POST", body: payload }
     )
 
+    const createTourGroup = (tourId: UUID, payload: Partial<Group>) =>
+    $fetch<Group>(
+      `${apiBase}/tours/${tourId}/groups/`,
+      { method: "POST", body: payload }
+    )
+
+  const updateTourGroup = (tourId: UUID, groupId: UUID, payload: Partial<Group>) =>
+    $fetch<Group>(
+      `${apiBase}/tours/${tourId}/groups/${groupId}/`,
+      { method: "PUT", body: payload }
+    )
+
+  const deleteTourGroup = (tourId: UUID, groupId: UUID) =>
+    $fetch<{ ok: boolean }>(
+      `${apiBase}/tours/${tourId}/groups/${groupId}/`,
+      { method: "DELETE" }
+    )
+
     
 
   return {
@@ -224,6 +245,9 @@ export const useApi = () => {
     deleteTourScheduleTemplate,
     searchHotels,
     saveDayLodging,
-    deleteDayLodging
+    deleteDayLodging,
+    createTourGroup,
+    updateTourGroup,
+    deleteTourGroup,
   }
 }
