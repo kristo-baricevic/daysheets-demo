@@ -1,12 +1,14 @@
 <template>
-    <div class="page">
+  <div class="page">
     <ThreeColumnShell
       :showRight="true"
       :rightCollapsed="rightCollapsed"
       @toggleRight="rightCollapsed = !rightCollapsed"
     >
       <template #middle>
-        <ScheduleList :events="events" @edit="editOpen = true" @add="openAdd" />
+        <div class="middleStack">
+          <ScheduleList :events="visibleEvents" @edit="editOpen = true" @add="openAdd" />
+        </div>
       </template>
 
       <template #right>
@@ -18,7 +20,6 @@
             @editLodging="openEditLodgingModal"
             @deleteLodging="handleDeleteLodging"
           />
-
 
           <ScheduleAddEventDrawer
             v-if="addOpen"
@@ -55,12 +56,12 @@
       @saved="handleLodgingSaved"
     />
   </div>
-
 </template>
 
 <script setup lang="ts">
-import type { Day, EditLodging, Group, Person, ScheduleEvent } from "~~/types/app";
+import type { EditLodging, Group, Person, ScheduleEvent } from "~~/types/app";
 import { useRoute } from "vue-router";
+import { useScheduleAssoc } from "~/composables/useScheduleFilter";
 
 onMounted(() => window.addEventListener("keydown", onKeydown));
 onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
@@ -88,15 +89,87 @@ const context = computed(() => contextData.value ?? null);
 const groups = computed<Group[]>(() => (personnelData.value?.groups ?? []) as Group[]);
 const people = computed<Person[]>(() => (personnelData.value?.people ?? []) as Person[]);
 
-const activeDay = computed<Day | undefined>(() =>
-  (days.value ?? []).find((d) => d.id === dayId.value)
-);
+const selectedAssoc = useScheduleAssoc();
 
-const { data: days } = useAsyncData(
-  () => `days:${tourId.value}`,
-  () => api.getTourDays(tourId.value),
-  { watch: [tourId] }
-);
+type NormalizedAssoc = { kind: "person" | "group"; id: string };
+
+const normalizeEventAssocs = (ev: ScheduleEvent): NormalizedAssoc[] => {
+  const anyEv = ev as any;
+  const out: NormalizedAssoc[] = [];
+
+  const push = (kind: "person" | "group", id: unknown) => {
+    const s = String(id ?? "");
+    if (s) out.push({ kind, id: s });
+  };
+
+  const assocArray: any[] = Array.isArray(anyEv.associations)
+    ? anyEv.associations
+    : Array.isArray(anyEv.associated)
+      ? anyEv.associated
+      : [];
+
+  for (const a of assocArray) {
+    if (!a) continue;
+
+    const kindRaw = String(a.kind ?? a.type ?? a.model ?? "").toLowerCase();
+
+    if (a.personId ?? a.person_id ?? a.person?.id ?? a.person) {
+      push("person", a.personId ?? a.person_id ?? a.person?.id ?? a.person);
+    }
+
+    if (a.groupId ?? a.group_id ?? a.group?.id ?? a.group) {
+      push("group", a.groupId ?? a.group_id ?? a.group?.id ?? a.group);
+    }
+
+    if ((kindRaw === "person" || kindRaw.includes("person")) && (a.id ?? a.pk)) {
+      push("person", a.id ?? a.pk);
+    }
+
+    if ((kindRaw === "group" || kindRaw.includes("group")) && (a.id ?? a.pk)) {
+      push("group", a.id ?? a.pk);
+    }
+  }
+
+  const peopleArr: any[] = Array.isArray(anyEv.people)
+    ? anyEv.people
+    : Array.isArray(anyEv.persons)
+      ? anyEv.persons
+      : [];
+  for (const p of peopleArr) push("person", p?.id ?? p);
+
+  const groupsArr: any[] = Array.isArray(anyEv.groups) ? anyEv.groups : [];
+  for (const g of groupsArr) push("group", g?.id ?? g);
+
+  const personIds: any[] = Array.isArray(anyEv.personIds)
+    ? anyEv.personIds
+    : Array.isArray(anyEv.person_ids)
+      ? anyEv.person_ids
+      : [];
+  for (const id of personIds) push("person", id);
+
+  const groupIds: any[] = Array.isArray(anyEv.groupIds)
+    ? anyEv.groupIds
+    : Array.isArray(anyEv.group_ids)
+      ? anyEv.group_ids
+      : [];
+  for (const id of groupIds) push("group", id);
+
+  return out;
+};
+
+const eventMatchesSelected = (ev: ScheduleEvent) => {
+  const pick = selectedAssoc.value;
+  if (!pick) return true;
+
+  const assocs = normalizeEventAssocs(ev);
+  return assocs.some((a) => a.kind === pick.kind && a.id === pick.id);
+};
+
+const visibleEvents = computed<ScheduleEvent[]>(() => {
+  const list = events.value ?? [];
+  const pick = selectedAssoc.value;
+  return pick ? list.filter(eventMatchesSelected) : list;
+});
 
 const { data: templatesData, refresh: refreshTemplates } = useAsyncData(
   () => `templates:${tourId.value}`,
@@ -115,8 +188,6 @@ const { data: contextData, refresh: refreshContext } = useAsyncData(
   () => api.getDayContext(dayId.value),
   { watch: [dayId] }
 );
-
-console.log("contextData", contextData)
 
 const { data: personnelData } = useAsyncData(
   () => `personnel:${tourId.value}`,
@@ -150,7 +221,6 @@ const openAddLodgingModal = () => {
 const openEditLodgingModal = () => {
   const l = context.value?.lodging;
   if (!l) return;
-  console.log("l ", l)
 
   lodgingExisting.value = {
     id: l.id,
@@ -174,15 +244,15 @@ const openEditLodgingModal = () => {
     guests: l.guests ?? [],
     updated_at: l.updated_at,
   };
-  console.log("lodgingExisting", lodgingExisting.value)
+
   lodgingOpen.value = true;
   rightCollapsed.value = false;
 };
 
 const handleDeleteLodging = async () => {
-  await api.deleteDayLodging(dayId.value)
-  await refreshContext()
-}
+  await api.deleteDayLodging(dayId.value);
+  await refreshContext();
+};
 
 const handleLodgingSaved = async () => {
   lodgingOpen.value = false;
@@ -208,29 +278,17 @@ const onKeydown = (e: KeyboardEvent) => {
   flex-direction: column;
   min-height: 0;
 }
-.page-header {
-  padding: 14px 14px 0 14px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
-.title {
-  font-size: 18px;
-  font-weight: 700;
-}
-.subtitle {
-  color: var(--muted);
-  margin-top: 4px;
-}
-.actions {
-  display: flex;
-  gap: 10px;
-}
 
 .rightSlot {
   position: relative;
   height: 100%;
+  min-height: 0;
+}
+
+.middleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   min-height: 0;
 }
 </style>
