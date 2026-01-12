@@ -33,8 +33,7 @@ defineProps<{
 
 .right {
   width: 420px;
-  border-left: 1px solid var(--border);
-  background: rgba(148, 163, 184, 0.06);
+  border-left: 0px solid var(--border);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -56,7 +55,7 @@ defineProps<{
   .right {
     width: 100%;
     border-left: 0;
-    border-top: 1px solid var(--border);
+    border-top: 0px solid var(--border);
     overflow: visible;
   }
 }

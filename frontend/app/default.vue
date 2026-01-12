@@ -102,12 +102,10 @@ const showRight = computed(() => {
 }
 .left,
 .right {
-  border-right: 1px solid #e5e7eb;
   overflow: hidden;
 }
 .right {
   border-right: 0;
-  border-left: 1px solid #e5e7eb;
 }
 .center {
   overflow: auto;
@@ -122,7 +120,7 @@ const showRight = computed(() => {
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 0px solid #e5e7eb;
 }
 .collapseBtn {
   height: 28px;
