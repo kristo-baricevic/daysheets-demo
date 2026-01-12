@@ -19,7 +19,7 @@
           <span class="navIcon">👤</span>
           <span v-if="!isCompact" class="navText">Personnel</span>
         </NuxtLink>
-
+        <!-- 
         <a class="navRow" href="#">
           <span class="navIcon">📄</span>
           <span v-if="!isCompact" class="navText">Documents</span>
@@ -29,7 +29,7 @@
           <span class="navIcon">✈</span>
           <span v-if="!isCompact" class="navText">Flights</span>
           <span v-if="!isCompact" class="pill">NEW</span>
-        </a>
+        </a> -->
       </nav>
 
       <div class="hairline"></div>
@@ -42,16 +42,10 @@
 
         <div v-if="!isCompact" class="search">
           <span class="searchIcon">🔍</span>
-          <input
-            class="searchInput"
-            v-model="query"
-            placeholder="City, Venue, or Date"
-          />
+          <input class="searchInput" v-model="query" placeholder="City, Venue, or Date" />
         </div>
 
-        <button v-else class="searchMini" type="button" aria-label="Search">
-          🔍
-        </button>
+        <button v-else class="searchMini" type="button" aria-label="Search">🔍</button>
       </div>
     </div>
 
@@ -120,17 +114,15 @@ watch(
 
 const days = computed<Day[]>(() => daysData.value ?? []);
 const activeTour = computed(() => tours.value.find((t) => t.id === tourId.value));
-const activeDay = computed(() => days.value.find((d) => d.id === dayId.value));
-
-const scheduleLink = computed(() => {
-  const firstDay = days.value[0]?.id;
-  if (!firstDay) return `/tours/${tourId.value}/days/1`;
-  return `/tours/${tourId.value}/days/${firstDay}`;
-});
+const scheduleLink = computed(() => `/tours/${tourId.value}`);
 
 const personnelLink = computed(() => `/tours/${tourId.value}/personnel`);
 
-const isScheduleActive = computed(() => route.path.includes(`/tours/${tourId.value}/days/`));
+const isScheduleActive = computed(() => {
+  const base = `/tours/${tourId.value}`;
+  return route.path === base || route.path.includes(`${base}/days/`);
+});
+
 const isPersonnelActive = computed(() => route.path.includes(`/tours/${tourId.value}/personnel`));
 
 const goDay = (id: string) => router.push(`/tours/${tourId.value}/days/${id}`);
@@ -149,9 +141,7 @@ const filteredDays = computed(() => {
   if (!q) return days.value;
 
   return days.value.filter((d) => {
-    const hay = [d.dateISO, d.city, d.state ?? "", labelDayType(d.dayType)]
-      .join(" ")
-      .toLowerCase();
+    const hay = [d.dateISO, d.city, d.state ?? "", labelDayType(d.dayType)].join(" ").toLowerCase();
     return hay.includes(q);
   });
 });
@@ -172,7 +162,9 @@ const goToday = () => {
   const dd = String(now.getDate()).padStart(2, "0");
   const key = `${mm}/${dd}`;
 
-  const match = days.value.find((d) => compactDate(d.dateISO) === key || (d.dateISO || "").includes(key));
+  const match = days.value.find(
+    (d) => compactDate(d.dateISO) === key || (d.dateISO || "").includes(key)
+  );
   const target = match?.id ?? days.value[0]?.id;
   if (target) goDay(target);
 };

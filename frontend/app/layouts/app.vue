@@ -41,10 +41,10 @@
             <div class="subtitle">{{ activeTour?.subtitle ?? "" }}</div>
           </div>
 
-          <div class="ph-right">
+          <!-- <div class="ph-right">
             <button class="iconBtnDark" type="button">+</button>
             <button class="iconBtnDark" type="button">⋯</button>
-          </div>
+          </div> -->
         </header>
 
         <main class="main">

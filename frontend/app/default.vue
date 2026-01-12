@@ -29,11 +29,7 @@
       <slot />
     </main>
 
-    <aside
-      class="right"
-      v-if="showRight"
-      :class="{ collapsed: rightCollapsed }"
-    >
+    <aside class="right" v-if="showRight" :class="{ collapsed: rightCollapsed }">
       <div class="rightHeader">
         <div class="title">Context</div>
         <button class="collapseBtn" @click="rightCollapsed = !rightCollapsed">
@@ -82,15 +78,11 @@ const contacts = ref([
   { id: "c2", role: "Runner", name: "Sam" },
 ]);
 
-const notes = ref([
-  { id: "n1", title: "Load-in", body: "Dock opens at 10:00." },
-]);
+const notes = ref([{ id: "n1", title: "Load-in", body: "Dock opens at 10:00." }]);
 
 const showRight = computed(() => {
   const route = useRoute();
-  return (
-    route.path.startsWith("/schedule") || route.path.startsWith("/personnel")
-  );
+  return route.path.startsWith("/schedule") || route.path.startsWith("/personnel");
 });
 </script>
 

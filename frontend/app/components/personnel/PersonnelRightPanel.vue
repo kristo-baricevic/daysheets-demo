@@ -10,8 +10,8 @@
     <div class="drawerBody">
       <div v-if="mode === 'add'" class="intro">
         <div class="introText">
-          Use the entry field below to search for personnel you've worked with in the
-          past, or enter the name of a new team member you'd like to create.
+          Use the entry field below to search for personnel you've worked with in the past, or enter
+          the name of a new team member you'd like to create.
         </div>
 
         <div class="sectionTitle">Search by name to add existing personnel</div>
@@ -75,12 +75,7 @@
     <div class="drawerActions">
       <button class="btn secondary" type="button" @click="$emit('close')">Close</button>
       <div class="spacer"></div>
-      <button
-        v-if="mode === 'edit' && person"
-        class="btn secondary"
-        type="button"
-        @click="remove"
-      >
+      <button v-if="mode === 'edit' && person" class="btn secondary" type="button" @click="remove">
         Delete
       </button>
       <button class="btn" type="button" @click="save">
@@ -121,7 +116,7 @@ const blankDraft = () =>
     phone: "",
     groupId: "",
     permission: "read",
-    connected: false
+    connected: false,
   }) as Omit<Person, "id">;
 
 const draft = ref<Omit<Person, "id">>(blankDraft());
@@ -143,7 +138,7 @@ watch(
         phone: person.phone ?? "",
         groupId: person.groupId ?? "",
         permission: person.permission,
-        connected: person.connected ?? false
+        connected: person.connected ?? false,
       };
     }
   },

@@ -1,18 +1,57 @@
+<template>
+  <div class="page">
+    <ThreeColumnShell :showRight="false">
+      <template #middle>
+        <TourRoutingTable :rows="routingRows" @selectDay="goDay" />
+      </template>
+    </ThreeColumnShell>
+  </div>
+</template>
+
 <script setup lang="ts">
+import { computed } from "vue";
+import type { Day, TourRoutingRow } from "~~/types/app";
+import TourRoutingTable from "../../../components/TourRoutingTable.vue";
+
 definePageMeta({ layout: "app" });
-import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
 
-const tourId = String(route.params.tourId);
+const tourId = computed(() => String(route.params.tourId || ""));
 
-import { onMounted } from "vue";
+const { data: daysData } = useAsyncData<Day[]>(
+  () => `tour-days:${tourId.value}`,
+  () => api.getTourDays(tourId.value),
+  {
+    watch: [tourId],
+    default: () => [],
+  }
+);
 
-onMounted(async () => {
-  const days = await api.getTourDays(tourId);
-  const firstDayId = days[0]?.id ?? "1";
-  router.replace(`/tours/${tourId}/days/${firstDayId}`);
-});
+const days = computed<Day[]>(() => daysData.value ?? []);
+
+const routingRows = computed<TourRoutingRow[]>(() =>
+  days.value.map((d) => ({
+    id: d.id,
+    dateISO: d.dateISO,
+    dayType: d.dayType,
+    city: d.city,
+    state: d.state ?? "",
+  }))
+);
+
+const goDay = (dayId: string) => {
+  router.push(`/tours/${tourId.value}/days/${dayId}`);
+};
 </script>
+
+<style scoped>
+.page {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+</style>

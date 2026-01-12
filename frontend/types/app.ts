@@ -138,3 +138,11 @@ export type EditLodging = {
   guests: DayLodgingGuest[];
   updated_at: string;
 };
+
+export type TourRoutingRow = {
+  id: string;
+  dateISO: string;
+  dayType: DayType;
+  city: string;
+  state: string;
+};
