@@ -120,9 +120,17 @@ const badgeStyle = (color: unknown) => {
 .thead,
 .row {
   display: grid;
-  grid-template-columns: 42px 1.35fr 0.65fr 0.9fr 1.6fr 0.9fr 60px;
+  --cols: 42px minmax(0, 1.35fr) minmax(0, 0.65fr) minmax(0, 0.9fr) minmax(0, 1.6fr)
+    minmax(0, 0.9fr) 60px;
+  grid-template-columns: var(--cols);
   gap: 12px;
   align-items: center;
+  min-width: 860px;
+}
+
+.thead > *,
+.row > * {
+  min-width: 0;
 }
 
 .thead {
@@ -231,5 +239,15 @@ const badgeStyle = (color: unknown) => {
 .actionCell {
   display: flex;
   justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .thead,
+  .row {
+    --cols: 42px minmax(0, 1.2fr) minmax(0, 0.6fr) minmax(0, 0.85fr) minmax(0, 1.4fr)
+      minmax(0, 0.8fr) 54px;
+    min-width: 760px;
+    gap: 10px;
+  }
 }
 </style>
