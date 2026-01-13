@@ -52,7 +52,9 @@
           <div class="caret">{{ aftershowOpen ? "▴" : "▾" }}</div>
         </div>
 
-        <button class="editBtn" type="button" @click.stop="startEditAftershow">✎</button>
+        <button v-if="aftershowOpen" class="editBtn" type="button" @click.stop="startEditAftershow">
+          ✎
+        </button>
       </div>
 
       <div v-if="aftershowOpen" class="aftershowBody">
@@ -71,6 +73,15 @@
             <button class="btn" @click="saveAftershow">Save</button>
           </div>
         </div>
+      </div>
+
+      <!-- ADD EVENT FOOTER -->
+      <div class="aftershowFooter">
+        <button class="addBtn" type="button" @click="$emit('add')">
+          <span class="plus">+</span>
+          <span>Add Event</span>
+          <span class="shortcut">(⌘E)</span>
+        </button>
       </div>
     </div>
   </div>
@@ -454,5 +465,16 @@ const badgeStyleForGroup = (g: Group | null) => {
 
 .aftershowActions .btn:not(.secondary):hover {
   background: #091dff;
+}
+.aftershowFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.shortcut {
+  color: #091dff;
+  font-size: 14px;
 }
 </style>
