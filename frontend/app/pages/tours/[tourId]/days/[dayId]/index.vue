@@ -289,7 +289,11 @@ const handleAddNote = () => {
   rightCollapsed.value = false;
 };
 
-const handleSaveNote = async (payload: { title: string; body: string }) => {
+const handleSaveNote = async (payload: {
+  title: string;
+  body: string;
+  visibility: { kind: "group" | "person"; id: string }[];
+}) => {
   await api.createDayNote(dayId.value, payload);
   noteOpen.value = false;
   await refreshContext();

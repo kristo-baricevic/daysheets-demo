@@ -136,6 +136,7 @@ class Note(models.Model):
     body = models.TextField(blank=True, default="")
     last_edited_by = models.CharField(max_length=128, blank=True, default="")
     last_edited_at = models.DateTimeField(auto_now=True)
+    visibility = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ["-last_edited_at"]

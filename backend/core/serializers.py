@@ -45,14 +45,55 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = ["id", "dayId", "name", "role", "phone", "email"]
 
 
+from rest_framework import serializers
+from core.models import Note, Group, Person
+
 class NoteSerializer(serializers.ModelSerializer):
     dayId = serializers.UUIDField(source="day_id", read_only=True)
-    lastEditedBy = serializers.CharField(source="last_edited_by")
-    lastEditedAtISO = serializers.DateTimeField(source="last_edited_at")
+    lastEditedBy = serializers.CharField(source="last_edited_by", read_only=True)
+    lastEditedAtISO = serializers.DateTimeField(source="last_edited_at", read_only=True)
+    visibility = serializers.SerializerMethodField()
 
     class Meta:
         model = Note
-        fields = ["id", "dayId", "title", "body", "lastEditedBy", "lastEditedAtISO"]
+        fields = [
+            "id",
+            "dayId",
+            "title",
+            "body",
+            "visibility",
+            "lastEditedBy",
+            "lastEditedAtISO",
+        ]
+
+    def get_visibility(self, obj):
+        raw = obj.visibility or []
+
+        group_ids = [str(x.get("id")) for x in raw if x.get("kind") == "group" and x.get("id")]
+        person_ids = [str(x.get("id")) for x in raw if x.get("kind") == "person" and x.get("id")]
+
+        group_map = {str(g.id): g.name for g in Group.objects.filter(id__in=group_ids)}
+        person_map = {str(p.id): p.name for p in Person.objects.filter(id__in=person_ids)}
+
+        out = []
+        for x in raw:
+            kind = (x.get("kind") or "").strip()
+            _id = str(x.get("id") or "").strip()
+            if kind not in ["group", "person"] or not _id:
+                continue
+
+            name = group_map.get(_id) if kind == "group" else person_map.get(_id)
+
+            out.append(
+                {
+                    "kind": kind,
+                    "id": _id,
+                    "name": name or "",
+                }
+            )
+
+        return out
+
 
 
 class GroupSerializer(serializers.ModelSerializer):

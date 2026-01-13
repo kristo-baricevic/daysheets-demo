@@ -397,18 +397,31 @@ class DayNotes(APIView):
     def post(self, request, day_id):
         title = (request.data.get("title") or "").strip()
         body = (request.data.get("body") or "").strip()
+        visibility_in = request.data.get("visibility", [])
+        visibility = []
+
+        if isinstance(visibility_in, list):
+            for v in visibility_in:
+                if not isinstance(v, dict):
+                    continue
+                kind = (v.get("kind") or "").strip()
+                _id = str(v.get("id") or "").strip()
+                if kind in ["group", "person"] and _id:
+                    visibility.append({"kind": kind, "id": _id})
 
         if not title:
-            return Response({"detail": "title is required"}, status=400)
+            return Response({"detail": "title is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         note = Note.objects.create(
             day_id=day_id,
             title=title,
             body=body,
+            visibility=visibility,
             last_edited_by=request.user.username if request.user.is_authenticated else "",
         )
 
-        return Response(NoteSerializer(note).data, status=201)
+        return Response(NoteSerializer(note).data, status=status.HTTP_201_CREATED)
+
 
 class DayNoteDetail(APIView):
     def delete(self, request, day_id, note_id):

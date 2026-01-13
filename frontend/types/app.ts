@@ -54,6 +54,12 @@ export type Contact = {
   email?: string;
 };
 
+export type NoteVisibility = {
+  kind: "group" | "person";
+  id: ID;
+  name: string;
+};
+
 export type Note = {
   id: ID;
   dayId: ID;
@@ -61,6 +67,7 @@ export type Note = {
   body: string;
   lastEditedBy: string;
   lastEditedAtISO: string;
+  visibility: NoteVisibility[];
 };
 
 export type GroupColor = "red" | "gold" | "indigo" | "green" | "blue" | "purple";

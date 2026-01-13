@@ -126,11 +126,18 @@
       </button>
 
       <div v-if="openNotes" class="panel-body">
-        <div v-for="n in context.notes" :key="n.id" class="note">
+        <div v-for="n in notes" :key="n.id" class="note">
           <div class="noteTop">
             <div class="strong">{{ n.title }}</div>
             <div class="noteRight">
-              <div class="chip">C</div>
+              <div
+                v-for="v in noteVisibilities(n)"
+                :key="v.kind + v.id"
+                class="chip"
+                :title="v.name"
+              >
+                {{ v.name?.[0]?.toUpperCase() }}
+              </div>
 
               <div class="menuWrap">
                 <button class="dotsBtn" type="button" @click.stop="toggleNoteMenu(n.id)">
@@ -151,7 +158,7 @@
           </div>
 
           <div class="noteFooter muted">
-            Last edit: {{ n.lastEditedBy }} {{ n.lastEditedAtISO }}
+            Last edit: {{ n.lastEditedBy }} {{ formatDate(n.lastEditedAtISO) }}
           </div>
         </div>
         <div class="panelFooter">
@@ -166,9 +173,10 @@
 </template>
 
 <script setup lang="ts">
-import type { DayContext } from "~~/types/app";
+import type { DayContext, Note, NoteVisibility } from "~~/types/app";
 
 const props = defineProps<{ context: DayContext }>();
+const notes = computed<Note[]>(() => props.context.notes as Note[]);
 
 const emit = defineEmits<{
   (e: "addLodging"): void;
@@ -227,6 +235,10 @@ const onDocClick = () => {
   noteMenuOpen.value = null;
 };
 
+const noteVisibilities = (n: Note) => {
+  return Array.isArray(n.visibility) ? n.visibility : [];
+};
+
 onMounted(() => document.addEventListener("click", onDocClick));
 onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
@@ -246,6 +258,17 @@ const lodgingChips = computed<string[]>(() => {
     return l.assignees.slice(0, 3).map((x: any) => String(x).slice(0, 1).toUpperCase());
   return [];
 });
+
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
 </script>
 
 <style scoped>

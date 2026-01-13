@@ -14,15 +14,29 @@
 
         <label>
           <div class="label">Details</div>
-          <textarea class="textarea" rows="6" v-model="body" />
+          <textarea class="textarea" rows="6" v-model="body"></textarea>
         </label>
         <label>
           <div class="label">Visibility</div>
 
           <div class="chipsRow">
-            <div v-for="v in selected" :key="v.kind + v.id" class="chip">
-              {{ v.name }}
-              <button type="button" @click="removeItem(v)">×</button>
+            <div v-for="v in selected" :key="v.kind + v.id" class="chip" :title="displayName(v)">
+              <div
+                v-if="v.kind === 'group'"
+                class="chipBadge groupBadge"
+                :style="{
+                  background: groupStyle(displayName(v)).bg,
+                  color: groupStyle(displayName(v)).fg,
+                }"
+              >
+                {{ displayName(v)[0]?.toUpperCase() }}
+              </div>
+
+              <div v-else class="chipBadge avatar">
+                {{ initials(displayName(v)) }}
+              </div>
+
+              <button type="button" class="chipX" @click.stop="removeItem(v)">×</button>
             </div>
 
             <input
@@ -39,10 +53,10 @@
               :key="r.kind + r.id"
               type="button"
               class="dropdownRow"
-              @click="addItem(r)"
+              @mousedown.prevent.stop="addItem(r)"
+              @click.prevent.stop
             >
               <div class="rowLeft">
-                <!-- GROUP -->
                 <div
                   v-if="r.kind === 'group'"
                   class="groupBadge"
@@ -54,7 +68,6 @@
                   {{ r.name[0]?.toUpperCase() }}
                 </div>
 
-                <!-- PERSON -->
                 <div v-else class="avatar">
                   {{ initials(r.name) }}
                 </div>
@@ -143,10 +156,26 @@ const results = computed<VisibilityItem[]>(() => {
   );
 });
 
+const groupNameById = computed(() => {
+  const m: Record<string, string> = {};
+  for (const g of props.groups) m[g.id] = g.name;
+  return m;
+});
+
+const personNameById = computed(() => {
+  const m: Record<string, string> = {};
+  for (const p of props.people) m[p.id] = p.name;
+  return m;
+});
+
+const displayName = (v: VisibilityItem) => {
+  if (v.kind === "group") return groupNameById.value[v.id] ?? v.name ?? "";
+  return personNameById.value[v.id] ?? v.name ?? "";
+};
+
 const addItem = (item: VisibilityItem) => {
   selected.value.push(item);
   query.value = "";
-  open.value = false;
 };
 
 const removeItem = (item: VisibilityItem) => {
@@ -338,5 +367,37 @@ onBeforeUnmount(() => {
   font-size: 12px;
   color: #64748b;
   text-transform: capitalize;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin-bottom: 4px;
+}
+
+.chipBadge {
+  width: 34px;
+  height: 34px;
+}
+
+.chipX {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.18);
+  color: #334155;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.chipX:hover {
+  background: rgba(148, 163, 184, 0.28);
 }
 </style>
