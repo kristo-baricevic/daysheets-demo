@@ -145,6 +145,17 @@
                 </button>
 
                 <div v-if="noteMenuOpen === n.id" class="menu" @click.stop>
+                  <button
+                    class="menuItem"
+                    type="button"
+                    @click.stop="
+                      noteMenuOpen = null;
+                      $emit('editNote', n);
+                    "
+                  >
+                    Edit
+                  </button>
+                   
                   <button class="menuItem danger" type="button" @click="onDeleteNote(n.id)">
                     Delete
                   </button>
@@ -176,7 +187,9 @@
 import type { DayContext, Note, NoteVisibility } from "~~/types/app";
 
 const props = defineProps<{ context: DayContext }>();
-const notes = computed<Note[]>(() => props.context.notes as Note[]);
+const notes = computed<Note[]>(() => {
+  return Array.isArray(props.context.notes) ? props.context.notes : [];
+});
 
 const emit = defineEmits<{
   (e: "addLodging"): void;
@@ -184,6 +197,7 @@ const emit = defineEmits<{
   (e: "deleteLodging"): void;
   (e: "addNote"): void;
   (e: "deleteNote", id: string): void;
+  (e: "editNote", note: any): void;
 }>();
 
 const openVenue = ref(true);

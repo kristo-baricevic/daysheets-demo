@@ -28,6 +28,7 @@
             @deleteLodging="handleDeleteLodging"
             @addNote="handleAddNote"
             @deleteNote="handleDeleteNote"
+            @editNote="handleEditNote"
           />
 
           <ScheduleAddEventDrawer
@@ -45,6 +46,7 @@
       v-if="noteOpen"
       :groups="groups"
       :people="people"
+      :note="editingNote"
       @close="noteOpen = false"
       @save="handleSaveNote"
     />
@@ -102,6 +104,7 @@ const addOpen = ref(false);
 const lodgingOpen = ref(false);
 const lodgingExisting = ref<EditLodging | null>(null);
 const noteOpen = ref(false);
+const editingNote = ref<any | null>(null);
 
 const events = computed<ScheduleEvent[]>(() => (eventsData.value ?? []) as ScheduleEvent[]);
 const context = computed(() => contextData.value ?? null);
@@ -285,23 +288,45 @@ const handleLodgingSaved = async () => {
 };
 
 const handleAddNote = () => {
+  editingNote.value = null;
   noteOpen.value = true;
   rightCollapsed.value = false;
 };
 
 const handleSaveNote = async (payload: {
+  id?: string;
   title: string;
   body: string;
   visibility: { kind: "group" | "person"; id: string }[];
 }) => {
-  await api.createDayNote(dayId.value, payload);
+  if (editingNote.value) {
+    await api.updateDayNote(dayId.value, editingNote.value.id, {
+      title: payload.title,
+      body: payload.body,
+      visibility: payload.visibility,
+    });
+  } else {
+    await api.createDayNote(dayId.value, {
+      title: payload.title,
+      body: payload.body,
+      visibility: payload.visibility,
+    });
+  }
+
   noteOpen.value = false;
+  editingNote.value = null;
   await refreshContext();
 };
 
 const handleDeleteNote = async (noteId: string) => {
   await api.deleteDayNote(dayId.value, noteId);
   await refreshContext();
+};
+
+const handleEditNote = (note: Note) => {
+  editingNote.value = note;
+  noteOpen.value = true;
+  rightCollapsed.value = false;
 };
 
 const onKeydown = (e: KeyboardEvent) => {

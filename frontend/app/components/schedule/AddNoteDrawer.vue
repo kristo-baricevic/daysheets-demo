@@ -97,6 +97,9 @@
 </template>
 
 <script setup lang="ts">
+import type { Group, Note, Person } from "~~/types/app";
+import type { NoteVisibility } from "~~/types/app";
+
 type VisibilityItem = {
   kind: "group" | "person";
   id: string;
@@ -116,12 +119,37 @@ const emit = defineEmits<{
 }>();
 
 const props = defineProps<{
-  groups: { id: string; name: string }[];
-  people: { id: string; name: string }[];
+  groups: Group[];
+  people: Person[];
+  note: Note | null;
 }>();
-
 const title = ref("");
 const body = ref("");
+const selected = ref<VisibilityItem[]>([]);
+const query = ref("");
+const open = ref(false);
+
+watch(
+  () => props.note,
+  (n) => {
+    if (!n) {
+      title.value = "";
+      body.value = "";
+      selected.value = [];
+      return;
+    }
+
+    title.value = n.title;
+    body.value = n.body;
+
+    selected.value = n.visibility.map((v) => ({
+      kind: v.kind,
+      id: v.id,
+      name: v.name,
+    }));
+  },
+  { immediate: true }
+);
 
 const save = () => {
   emit("save", {
@@ -133,11 +161,6 @@ const save = () => {
     })),
   });
 };
-
-const query = ref("");
-const open = ref(false);
-
-const selected = ref<VisibilityItem[]>([]);
 
 const results = computed<VisibilityItem[]>(() => {
   const q = query.value.trim().toLowerCase();

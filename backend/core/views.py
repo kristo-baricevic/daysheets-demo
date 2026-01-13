@@ -423,6 +423,7 @@ class DayNotes(APIView):
         return Response(NoteSerializer(note).data, status=status.HTTP_201_CREATED)
 
 
+
 class DayNoteDetail(APIView):
     def delete(self, request, day_id, note_id):
         Note.objects.filter(id=note_id, day_id=day_id).delete()

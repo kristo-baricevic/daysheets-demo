@@ -47,6 +47,7 @@ export type Contact = {
 };
 
 export type Note = {
+  [x: string]: any;
   id: UUID;
   dayId: UUID;
   title: string;
@@ -204,7 +205,14 @@ export const useApi = () => {
   const deleteTourGroup = (tourId: UUID, groupId: UUID) =>
     $fetch<{ ok: boolean }>(`${apiBase}/tours/${tourId}/groups/${groupId}/`, { method: "DELETE" });
 
-  const createDayNote = (dayId: UUID, payload: { title: string; body: string }) =>
+  const createDayNote = (
+    dayId: UUID,
+    payload: {
+      title: string;
+      body: string;
+      visibility: { kind: "group" | "person"; id: string }[];
+    }
+  ) =>
     $fetch<Note>(`${apiBase}/days/${dayId}/notes/`, {
       method: "POST",
       body: payload,
@@ -219,6 +227,20 @@ export const useApi = () => {
     $fetch(`${apiBase}/days/${dayId}/aftershow/`, {
       method: "POST",
       body: { aftershow },
+    });
+
+  const updateDayNote = (
+    dayId: UUID,
+    noteId: UUID,
+    payload: {
+      title: string;
+      body: string;
+      visibility: { kind: "group" | "person"; id: string }[];
+    }
+  ) =>
+    $fetch<Note>(`${apiBase}/days/${dayId}/notes/${noteId}/`, {
+      method: "PUT",
+      body: payload,
     });
 
   return {
@@ -243,5 +265,6 @@ export const useApi = () => {
     createDayNote,
     deleteDayNote,
     updateDayAftershow,
+    updateDayNote,
   };
 };
