@@ -6,10 +6,10 @@
         <input class="searchInput" v-model="q" placeholder="Filter by name, group, or role" />
       </div>
 
-      <!-- <div class="toolbarRight">
+      <div class="toolbarRight">
         <button class="btn secondary" type="button" @click="$emit('export')">Export</button>
         <button class="btn" type="button" @click="$emit('add')">Add personnel</button>
-      </div> -->
+      </div>
     </div>
 
     <div class="table">
