@@ -205,20 +205,24 @@ const locationEmoji = (t: TourRoutingRow["dayType"]) => {
 .locCell {
   overflow: hidden;
 }
-
 @media (max-width: 640px) {
-  .thead,
-  .row {
-    grid-template-columns: 120px 110px minmax(0, 1fr);
+  .table {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .between {
+    grid-template-columns: 150px 130px 320px;
+    min-width: 624px;
     gap: 12px;
   }
 
-  .thead {
-    padding: 12px 14px;
-  }
-
+  .thead,
   .row {
-    padding: 14px;
+    grid-template-columns: 150px 130px 320px;
+    min-width: 624px;
+    gap: 12px;
   }
 }
 </style>
