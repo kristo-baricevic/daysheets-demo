@@ -133,50 +133,61 @@
             </div>
 
             <div class="mobileTimeAssoc mobileOnly">
-              <div class="mLabel">Start Time</div>
               <div class="timeAssocRow">
-                <input class="input" type="time" v-model="row.startLocal" />
+                <div class="timeBlock">
+                  <div class="mLabel">Start Time</div>
+                  <input class="input" type="time" v-model="row.startLocal" />
+                </div>
 
-                <input class="input" type="time" v-model="row.endLocal" />
+                <div class="timeBlock">
+                  <div class="mLabel">End Time</div>
+                  <input class="input" type="time" v-model="row.endLocal" />
+                </div>
 
-                <button class="tbcBtn" type="button" @click="toggleTBC(row._key)">TBC</button>
+                <!-- <button class="tbcBtn" type="button" @click="toggleTBC(row._key)">TBC</button> -->
 
-                <div class="assocRow">
-                  <div class="assocBar">
-                    <span v-for="(a, idx) in row.associations" :key="idx" class="assocChip">
-                      <span class="chipText">{{ labelAssociation(a) }}</span>
-                      <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">
-                        ×
-                      </button>
-                    </span>
+                <div class="assocBlock">
+                  <div class="mLabel">Association</div>
 
-                    <select
-                      class="assocSelect"
-                      :value="assocPick[row._key] || ''"
-                      @change="onAssocSelect(row._key, ($event.target as HTMLSelectElement).value)"
+                  <div class="assocRow">
+                    <div class="assocBar">
+                      <span v-for="(a, idx) in row.associations" :key="idx" class="assocChip">
+                        <span class="chipText">{{ labelAssociation(a) }}</span>
+                        <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">
+                          ×
+                        </button>
+                      </span>
+
+                      <select
+                        class="assocSelect"
+                        :value="assocPick[row._key] || ''"
+                        @change="
+                          onAssocSelect(row._key, ($event.target as HTMLSelectElement).value)
+                        "
+                      >
+                        <option value="">Search for a group or person…</option>
+                        <optgroup label="Groups">
+                          <option v-for="g in groups" :key="g.id" :value="`group:${g.id}`">
+                            {{ g.name }}
+                          </option>
+                        </optgroup>
+                        <optgroup label="People">
+                          <option v-for="p in people" :key="p.id" :value="`person:${p.id}`">
+                            {{ p.name }}
+                          </option>
+                        </optgroup>
+                      </select>
+                    </div>
+
+                    <button
+                      class="worldBtn"
+                      type="button"
+                      @click="openTz(row._key)"
+                      aria-label="Time zone"
                     >
-                      <option value="">Search for a group or person…</option>
-                      <optgroup label="Groups">
-                        <option v-for="g in groups" :key="g.id" :value="`group:${g.id}`">
-                          {{ g.name }}
-                        </option>
-                      </optgroup>
-                      <optgroup label="People">
-                        <option v-for="p in people" :key="p.id" :value="`person:${p.id}`">
-                          {{ p.name }}
-                        </option>
-                      </optgroup>
-                    </select>
+                      🌐
+                    </button>
                   </div>
-
-                  <button
-                    class="worldBtn"
-                    type="button"
-                    @click="openTz(row._key)"
-                    aria-label="Time zone"
-                  >
-                    🌐
-                  </button>
                 </div>
               </div>
             </div>
@@ -874,6 +885,7 @@ const templates = computed(() => templatesData.value ?? []);
 
 .assocCell {
   grid-area: assoc;
+  min-width: 0;
 }
 
 .notesCell {
@@ -884,7 +896,8 @@ const templates = computed(() => templatesData.value ?? []);
   grid-area: trash;
   display: flex;
   justify-content: flex-end;
-  padding-top: 4px;
+  padding-top: 0;
+  align-items: flex-start;
 }
 
 .trashBtn {
@@ -914,6 +927,7 @@ const templates = computed(() => templatesData.value ?? []);
   padding: 0 12px;
   outline: none;
   color: #111827;
+  box-sizing: border-box;
 }
 
 .input:focus,
@@ -927,6 +941,7 @@ const templates = computed(() => templatesData.value ?? []);
   grid-template-columns: 1fr 52px;
   gap: 10px;
   align-items: center;
+  min-width: 0;
 }
 
 .assocBar {
@@ -974,9 +989,16 @@ const templates = computed(() => templatesData.value ?? []);
   outline: none;
   background: transparent;
   height: 42px;
-  min-width: 220px;
+  min-width: 0;
+  width: 100%;
   color: #6b7280;
   flex: 1 1 auto;
+}
+
+@media (min-width: 981px) {
+  .assocSelect {
+    min-width: 220px;
+  }
 }
 
 .worldBtn {
@@ -997,6 +1019,7 @@ const templates = computed(() => templatesData.value ?? []);
   color: #1d4ed8;
   font-weight: 600;
   cursor: pointer;
+  align-self: end;
 }
 
 .modal-foot {
@@ -1029,9 +1052,18 @@ const templates = computed(() => templatesData.value ?? []);
 
 .timeAssocRow {
   display: grid;
-  grid-template-columns: 0.8fr 0.8fr auto 1.6fr;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.8fr) auto minmax(0, 1.6fr);
   gap: 10px;
-  align-items: center;
+  align-items: end;
+  min-width: 0;
+}
+
+.timeBlock,
+.assocBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
 @media (max-width: 980px) {
@@ -1061,11 +1093,11 @@ const templates = computed(() => templatesData.value ?? []);
   }
 
   .timeAssocRow {
-    grid-template-columns: 0.9fr 0.9fr auto 1.3fr;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) auto minmax(0, 1.2fr);
   }
 
   .assocSelect {
-    min-width: 140px;
+    min-width: 0;
   }
 }
 
@@ -1304,5 +1336,17 @@ const templates = computed(() => templatesData.value ?? []);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+@media (max-width: 980px) {
+  .timeAssocRow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .timeAssocRow .tbcBtn {
+    align-self: flex-start;
+  }
 }
 </style>
