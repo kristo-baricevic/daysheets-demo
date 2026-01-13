@@ -3,7 +3,7 @@
     <header class="topbar">
       <div class="topbar-right">
         <button class="iconBtn" type="button">i</button>
-        <button class="iconBtn" type="button">🔔</button>
+        <!-- <button class="iconBtn" type="button">🔔</button> -->
         <span class="badge">Kristo Baricevic</span>
       </div>
     </header>

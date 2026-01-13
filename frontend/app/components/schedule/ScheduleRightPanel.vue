@@ -131,7 +131,18 @@
             <div class="strong">{{ n.title }}</div>
             <div class="noteRight">
               <div class="chip">C</div>
-              <button class="dotsBtn" type="button">•••</button>
+
+              <div class="menuWrap">
+                <button class="dotsBtn" type="button" @click.stop="toggleNoteMenu(n.id)">
+                  •••
+                </button>
+
+                <div v-if="noteMenuOpen === n.id" class="menu" @click.stop>
+                  <button class="menuItem danger" type="button" @click="onDeleteNote(n.id)">
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -142,6 +153,12 @@
           <div class="noteFooter muted">
             Last edit: {{ n.lastEditedBy }} {{ n.lastEditedAtISO }}
           </div>
+        </div>
+        <div class="panelFooter">
+          <button class="addLink" type="button" @click="$emit('addNote')">
+            <span class="plus">+</span>
+            <span>Add Note</span>
+          </button>
         </div>
       </div>
     </div>
@@ -157,12 +174,15 @@ const emit = defineEmits<{
   (e: "addLodging"): void;
   (e: "editLodging"): void;
   (e: "deleteLodging"): void;
+  (e: "addNote"): void;
+  (e: "deleteNote", id: string): void;
 }>();
 
 const openVenue = ref(true);
 const openLodging = ref(true);
 const openNotes = ref(true);
 const lodgingHotel = computed(() => lodging.value?.hotel ?? null);
+const noteMenuOpen = ref<string | null>(null);
 
 const lodging = computed<any>(() => {
   const c: any = props.context as any;
@@ -183,6 +203,10 @@ const lodgingCityLine = computed(() => {
 
 const lodgingMenuOpen = ref(false);
 
+const toggleNoteMenu = (id: string) => {
+  noteMenuOpen.value = noteMenuOpen.value === id ? null : id;
+};
+
 const onEditLodging = () => {
   lodgingMenuOpen.value = false;
   emit("editLodging");
@@ -193,8 +217,14 @@ const onDeleteLodging = () => {
   emit("deleteLodging");
 };
 
+const onDeleteNote = (id: string) => {
+  noteMenuOpen.value = null;
+  emit("deleteNote", id);
+};
+
 const onDocClick = () => {
   lodgingMenuOpen.value = false;
+  noteMenuOpen.value = null;
 };
 
 onMounted(() => document.addEventListener("click", onDocClick));
@@ -267,6 +297,7 @@ const lodgingChips = computed<string[]>(() => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding-bottom: 20px;
 }
 
 .panel {

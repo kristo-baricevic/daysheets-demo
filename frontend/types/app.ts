@@ -88,9 +88,10 @@ export type DayContext = {
   venue: Venue;
   contacts: Contact[];
   notes: Note[];
-  lodging?: DayLodging | null;
-  lodgings?: DayLodging[];
+  lodging: DayLodging | null;
+  aftershow: string;
 };
+
 export type DayLodgingGuest = {
   personId: string;
 };

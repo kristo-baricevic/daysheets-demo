@@ -18,7 +18,7 @@
         >
           Groups
         </button>
-        <button
+        <!-- <button
           class="tab"
           :class="{ active: tab === 'permissions' }"
           type="button"
@@ -33,7 +33,7 @@
           @click="setTab('travel')"
         >
           Travel Profiles
-        </button>
+        </button> -->
       </div>
     </div>
 

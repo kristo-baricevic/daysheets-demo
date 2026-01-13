@@ -7,7 +7,6 @@
       </div>
 
       <div class="cardHeadRight">
-        <button class="iconBtn" type="button">⛭</button>
         <button class="editBtn" type="button" @click="$emit('edit')">Edit</button>
       </div>
     </div>
@@ -47,16 +46,31 @@
         </div>
       </div>
 
-      <div class="aftershowRow">
+      <div class="aftershowRow" @click="aftershowOpen = !aftershowOpen">
         <div class="aftershowLeft">
           <div class="aftershowLabel">Aftershow</div>
-          <div class="caret">▾</div>
+          <div class="caret">{{ aftershowOpen ? "▴" : "▾" }}</div>
         </div>
 
-        <button class="addBtn" type="button" @click="$emit('add')">
-          <span class="plus">+</span>
-          <span>Add Event (⌘E)</span>
-        </button>
+        <button class="editBtn" type="button" @click.stop="startEditAftershow">✎</button>
+      </div>
+
+      <div v-if="aftershowOpen" class="aftershowBody">
+        <div v-if="!editingAftershow">
+          <div v-if="aftershow?.trim()">
+            {{ aftershow }}
+          </div>
+          <div v-else class="muted">No aftershow information provided.</div>
+        </div>
+
+        <div v-else>
+          <textarea class="aftershowInput" v-model="draftAftershow" rows="3" autofocus />
+
+          <div class="aftershowActions">
+            <button class="btn secondary" @click="cancelAftershow">Cancel</button>
+            <button class="btn" @click="saveAftershow">Save</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -65,11 +79,18 @@
 <script setup lang="ts">
 import type { ScheduleEvent } from "~~/types/app";
 
-defineEmits<{ (e: "edit"): void; (e: "add"): void }>();
+const aftershowOpen = ref(false);
+
+const emit = defineEmits<{
+  (e: "edit"): void;
+  (e: "add"): void;
+  (e: "saveAftershow", value: string): void;
+}>();
 
 const props = defineProps<{
   events: ScheduleEvent[];
   groups: Group[];
+  aftershow?: string;
 }>();
 
 const sorted = computed(() => {
@@ -77,6 +98,24 @@ const sorted = computed(() => {
     (a.startLocal ?? "99:99").localeCompare(b.startLocal ?? "99:99")
   );
 });
+
+const editingAftershow = ref(false);
+const draftAftershow = ref("");
+
+const startEditAftershow = () => {
+  aftershowOpen.value = true;
+  draftAftershow.value = props.aftershow ?? "";
+  editingAftershow.value = true;
+};
+
+const saveAftershow = () => {
+  emit("saveAftershow", draftAftershow.value.trim());
+  editingAftershow.value = false;
+};
+
+const cancelAftershow = () => {
+  editingAftershow.value = false;
+};
 
 const isFlight = (e: ScheduleEvent) => {
   const x = e as any;
@@ -372,5 +411,48 @@ const badgeStyleForGroup = (g: Group | null) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.aftershowBody {
+  padding: 16px;
+}
+.aftershowInput {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+}
+
+.aftershowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.aftershowActions .btn.secondary {
+  background: transparent;
+  border: 0;
+  color: #3b4cff;
+  font-size: 16px;
+  padding: 8px 12px;
+}
+
+.aftershowActions .btn.secondary:hover {
+  background: #82878f;
+}
+
+.aftershowActions .btn:not(.secondary) {
+  background: #3b4cff;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 16px;
+}
+
+.aftershowActions .btn:not(.secondary):hover {
+  background: #091dff;
 }
 </style>

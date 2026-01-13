@@ -204,6 +204,23 @@ export const useApi = () => {
   const deleteTourGroup = (tourId: UUID, groupId: UUID) =>
     $fetch<{ ok: boolean }>(`${apiBase}/tours/${tourId}/groups/${groupId}/`, { method: "DELETE" });
 
+  const createDayNote = (dayId: UUID, payload: { title: string; body: string }) =>
+    $fetch<Note>(`${apiBase}/days/${dayId}/notes/`, {
+      method: "POST",
+      body: payload,
+    });
+
+  const deleteDayNote = (dayId: UUID, noteId: UUID) =>
+    $fetch(`${apiBase}/days/${dayId}/notes/${noteId}/`, {
+      method: "DELETE",
+    });
+
+  const updateDayAftershow = (dayId: UUID, aftershow: string) =>
+    $fetch(`${apiBase}/days/${dayId}/aftershow/`, {
+      method: "POST",
+      body: { aftershow },
+    });
+
   return {
     getTours,
     getTourDays,
@@ -223,5 +240,8 @@ export const useApi = () => {
     createTourGroup,
     updateTourGroup,
     deleteTourGroup,
+    createDayNote,
+    deleteDayNote,
+    updateDayAftershow,
   };
 };

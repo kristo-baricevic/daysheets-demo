@@ -12,6 +12,8 @@
             :groups="groups"
             @edit="editOpen = true"
             @add="openAdd"
+            :aftershow="context?.aftershow"
+            @saveAftershow="handleSaveAftershow"
           />
         </div>
       </template>
@@ -24,6 +26,8 @@
             @addLodging="openAddLodgingModal"
             @editLodging="openEditLodgingModal"
             @deleteLodging="handleDeleteLodging"
+            @addNote="handleAddNote"
+            @deleteNote="handleDeleteNote"
           />
 
           <ScheduleAddEventDrawer
@@ -37,6 +41,13 @@
         </div>
       </template>
     </ThreeColumnShell>
+    <AddNoteDrawer
+      v-if="noteOpen"
+      :groups="groups"
+      :people="people"
+      @close="noteOpen = false"
+      @save="handleSaveNote"
+    />
 
     <ScheduleEditModal
       v-if="editOpen"
@@ -69,6 +80,7 @@ import { useRoute } from "vue-router";
 import { useScheduleAssoc } from "~/composables/useScheduleFilter";
 import ScheduleAddEventDrawer from "~/components/schedule/ScheduleAddEventDrawer.vue";
 import AddLodgingModal from "~/components/schedule/AddLodgingModal.vue";
+import AddNoteDrawer from "~/components/schedule/AddNoteDrawer.vue";
 
 onMounted(() => window.addEventListener("keydown", onKeydown));
 onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
@@ -89,6 +101,7 @@ const editOpen = ref(false);
 const addOpen = ref(false);
 const lodgingOpen = ref(false);
 const lodgingExisting = ref<EditLodging | null>(null);
+const noteOpen = ref(false);
 
 const events = computed<ScheduleEvent[]>(() => (eventsData.value ?? []) as ScheduleEvent[]);
 const context = computed(() => contextData.value ?? null);
@@ -99,6 +112,11 @@ const people = computed<Person[]>(() => (personnelData.value?.people ?? []) as P
 const selectedAssoc = useScheduleAssoc();
 
 type NormalizedAssoc = { kind: "person" | "group"; id: string };
+
+const handleSaveAftershow = async (value: string) => {
+  await api.updateDayAftershow(dayId.value, value);
+  await refreshContext();
+};
 
 const normalizeEventAssocs = (ev: ScheduleEvent): NormalizedAssoc[] => {
   const anyEv = ev as any;
@@ -263,6 +281,22 @@ const handleDeleteLodging = async () => {
 
 const handleLodgingSaved = async () => {
   lodgingOpen.value = false;
+  await refreshContext();
+};
+
+const handleAddNote = () => {
+  noteOpen.value = true;
+  rightCollapsed.value = false;
+};
+
+const handleSaveNote = async (payload: { title: string; body: string }) => {
+  await api.createDayNote(dayId.value, payload);
+  noteOpen.value = false;
+  await refreshContext();
+};
+
+const handleDeleteNote = async (noteId: string) => {
+  await api.deleteDayNote(dayId.value, noteId);
   await refreshContext();
 };
 
