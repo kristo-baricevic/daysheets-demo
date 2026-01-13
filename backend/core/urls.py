@@ -16,4 +16,7 @@ urlpatterns = [
     path("tours/<uuid:tour_id>/schedule-templates/<uuid:template_id>/", views.TourScheduleTemplateList.as_view()),
     path("hotels/search/", views.HotelSearchView.as_view(), name="hotel-search"),
     path("days/<uuid:day_id>/lodging/", views.SaveDayLodgingView.as_view(), name="day-lodging"),
+    path("days/<uuid:day_id>/notes/", views.DayNotes.as_view()),
+    path("days/<uuid:day_id>/notes/<uuid:note_id>/", views.DayNoteDetail.as_view()),
+    path("days/<uuid:day_id>/aftershow/", views.DayAftershow.as_view()),
 ]

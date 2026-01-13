@@ -12,7 +12,7 @@ from django.db.models import Q, Case, When, IntegerField
 
 from rest_framework import generics
 
-from core.models import Tour, Day, ScheduleEvent, Group, Person, ScheduleTemplate, Hotel, DayLodging, DayLodgingGuest
+from core.models import Tour, Day, ScheduleEvent, Group, Person, ScheduleTemplate, Hotel, DayLodging, DayLodgingGuest, Note
 from core.serializers import (
     TourSerializer,
     DaySerializer,
@@ -62,12 +62,13 @@ class DayContext(APIView):
 
         return Response(
             {
-                "venue": VenueSerializer(day.venue).data,
+                "venue": VenueSerializer(day.venue).data if day.venue else None,
                 "contacts": ContactSerializer(day.contacts.all(), many=True).data,
                 "notes": NoteSerializer(day.notes.all(), many=True).data,
                 "lodging": (
                     DayLodgingSerializer(lodging).data if lodging else None
                 ),
+                "aftershow": day.aftershow,
             }
         )
 
@@ -391,3 +392,35 @@ class TourGroupsDetail(APIView):
     def delete(self, request, tour_id, group_id):
         Group.objects.filter(id=group_id, tour_id=tour_id).delete()
         return Response({"ok": True})
+
+class DayNotes(APIView):
+    def post(self, request, day_id):
+        title = (request.data.get("title") or "").strip()
+        body = (request.data.get("body") or "").strip()
+
+        if not title:
+            return Response({"detail": "title is required"}, status=400)
+
+        note = Note.objects.create(
+            day_id=day_id,
+            title=title,
+            body=body,
+            last_edited_by=request.user.username if request.user.is_authenticated else "",
+        )
+
+        return Response(NoteSerializer(note).data, status=201)
+
+class DayNoteDetail(APIView):
+    def delete(self, request, day_id, note_id):
+        Note.objects.filter(id=note_id, day_id=day_id).delete()
+        return Response({"ok": True})
+
+class DayAftershow(APIView):
+    def post(self, request, day_id):
+        day = get_object_or_404(Day, id=day_id)
+
+        text = (request.data.get("aftershow") or "").strip()
+        day.aftershow = text
+        day.save(update_fields=["aftershow"])
+
+        return Response({"aftershow": day.aftershow})

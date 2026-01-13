@@ -41,6 +41,7 @@ class Day(models.Model):
     state = models.CharField(max_length=64, blank=True, default="")
     tz = models.CharField(max_length=64, default="America/Los_Angeles")
     venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="days")
+    aftershow = models.TextField(blank=True, default="")
 
     class Meta:
         indexes = [
