@@ -446,4 +446,10 @@ const isCompact = computed(() => isNarrow.value || leftCollapsed.value);
   gap: 6px;
   font-size: 32px;
 }
+
+@media (max-width: 760px) {
+  .collapseFooter {
+    display: none;
+  }
+}
 </style>
