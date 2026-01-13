@@ -141,6 +141,7 @@ const locationEmoji = (t: TourRoutingRow["dayType"]) => {
 .typeCell {
   font-weight: 700;
   color: rgba(15, 23, 42, 0.9);
+  margin-top: 14px;
 }
 
 .locCell {
@@ -194,5 +195,30 @@ const locationEmoji = (t: TourRoutingRow["dayType"]) => {
 .between {
   height: 54px;
   background: rgba(148, 163, 184, 0.18);
+}
+
+.thead > *,
+.row > * {
+  min-width: 0;
+}
+
+.locCell {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .thead,
+  .row {
+    grid-template-columns: 120px 110px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .thead {
+    padding: 12px 14px;
+  }
+
+  .row {
+    padding: 14px;
+  }
 }
 </style>
