@@ -7,7 +7,7 @@
       </div>
 
       <div class="toolbarRight">
-        <button class="btn secondary" type="button" @click="$emit('export')">Export</button>
+        <!-- <button class="btn secondary" type="button" @click="$emit('export')">Export</button> -->
         <button class="btn" type="button" @click="$emit('add')">Add personnel</button>
       </div>
     </div>
