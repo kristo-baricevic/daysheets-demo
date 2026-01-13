@@ -67,6 +67,8 @@
 import type { EditLodging, Group, Person, ScheduleEvent } from "~~/types/app";
 import { useRoute } from "vue-router";
 import { useScheduleAssoc } from "~/composables/useScheduleFilter";
+import ScheduleAddEventDrawer from "~/components/schedule/ScheduleAddEventDrawer.vue";
+import AddLodgingModal from "~/components/schedule/AddLodgingModal.vue";
 
 onMounted(() => window.addEventListener("keydown", onKeydown));
 onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));

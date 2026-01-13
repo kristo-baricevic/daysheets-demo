@@ -89,6 +89,8 @@ import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import type { Group as AppGroup, Person as AppPerson } from "~~/types/app";
 import type { LocationQueryRaw } from "vue-router";
+import GroupRightPanel from "~/components/groups/GroupRightPanel.vue";
+import GroupsTable from "~/components/groups/GroupsTable.vue";
 
 definePageMeta({ layout: "app" });
 

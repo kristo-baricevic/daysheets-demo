@@ -60,7 +60,12 @@
             </div>
 
             <div class="trashCell">
-              <button class="trashBtn" type="button" @click="removeRow(row._key)" aria-label="Delete">
+              <button
+                class="trashBtn"
+                type="button"
+                @click="removeRow(row._key)"
+                aria-label="Delete"
+              >
                 🗑
               </button>
             </div>
@@ -87,7 +92,9 @@
                 <div class="assocBar">
                   <span v-for="(a, idx) in row.associations" :key="idx" class="assocChip">
                     <span class="chipText">{{ labelAssociation(a) }}</span>
-                    <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">×</button>
+                    <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">
+                      ×
+                    </button>
                   </span>
 
                   <select
@@ -109,7 +116,12 @@
                   </select>
                 </div>
 
-                <button class="worldBtn" type="button" @click="openTz(row._key)" aria-label="Time zone">
+                <button
+                  class="worldBtn"
+                  type="button"
+                  @click="openTz(row._key)"
+                  aria-label="Time zone"
+                >
                   🌐
                 </button>
               </div>
@@ -127,15 +139,15 @@
 
                 <input class="input" type="time" v-model="row.endLocal" />
 
-                <button class="tbcBtn" type="button" @click="toggleTBC(row._key)">
-                  TBC
-                </button>
+                <button class="tbcBtn" type="button" @click="toggleTBC(row._key)">TBC</button>
 
                 <div class="assocRow">
                   <div class="assocBar">
                     <span v-for="(a, idx) in row.associations" :key="idx" class="assocChip">
                       <span class="chipText">{{ labelAssociation(a) }}</span>
-                      <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">×</button>
+                      <button class="chipX" type="button" @click="removeAssoc(row._key, idx)">
+                        ×
+                      </button>
                     </span>
 
                     <select
@@ -157,7 +169,12 @@
                     </select>
                   </div>
 
-                  <button class="worldBtn" type="button" @click="openTz(row._key)" aria-label="Time zone">
+                  <button
+                    class="worldBtn"
+                    type="button"
+                    @click="openTz(row._key)"
+                    aria-label="Time zone"
+                  >
                     🌐
                   </button>
                 </div>
@@ -206,10 +223,7 @@
               </button>
             </div>
 
-
-            <div v-if="templatesList.length === 0" class="empty">
-              No templates yet.
-            </div>
+            <div v-if="templatesList.length === 0" class="empty">No templates yet.</div>
           </div>
 
           <div class="preview">
@@ -233,7 +247,10 @@
                   </div>
                 </div>
 
-                <div v-if="templatePreviewEvents(selectedTemplate).length === 0" class="emptyPreview">
+                <div
+                  v-if="templatePreviewEvents(selectedTemplate).length === 0"
+                  class="emptyPreview"
+                >
                   No events in this template.
                 </div>
               </div>
@@ -247,14 +264,21 @@
           <button class="btn secondary" type="button" @click="addRow">Add Event</button>
           <div class="spacer"></div>
           <button class="btn secondary" type="button" @click="$emit('close')">Cancel</button>
-          <button class="btn secondary" type="button" @click="saveAsTemplate">Save as Template</button>
+          <button class="btn secondary" type="button" @click="saveAsTemplate">
+            Save as Template
+          </button>
           <button class="btn primary" type="button" @click="save">Save</button>
         </template>
 
         <template v-else>
           <div class="spacer"></div>
           <button class="btn secondary" type="button" @click="$emit('close')">Cancel</button>
-          <button class="btn primary" type="button" :disabled="!selectedTemplateId" @click="useTemplate">
+          <button
+            class="btn primary"
+            type="button"
+            :disabled="!selectedTemplateId"
+            @click="useTemplate"
+          >
             Use Template
           </button>
         </template>
@@ -315,12 +339,11 @@
     @close="saveTemplateOpen = false"
     @save="confirmSaveTemplate"
   />
-
-  
 </template>
 
 <script setup lang="ts">
 import type { Association, Group, Person, ScheduleEvent } from "~~/types/app";
+import SaveScheduleTemplateModal from "~/components/schedule/SaveScheduleTemplateModal.vue";
 
 type ScheduleTemplateLike = {
   id: string;
@@ -424,7 +447,6 @@ const deleteTemplate = async (templateId: string) => {
   await refreshTemplates();
 };
 
-
 const addAssoc = (_key: string) => {
   const v = assocPick.value[_key];
   if (!v) return;
@@ -466,7 +488,6 @@ const hhmm = (v?: string) => {
   const mm = m[2];
   return `${h}:${mm}`;
 };
-
 
 const save = async () => {
   const create: any[] = [];
@@ -522,7 +543,7 @@ const confirmSaveTemplate = async () => {
     associations: r.associations ?? [],
     notes: r.notes ?? "",
     startTz: r.startTz || undefined,
-    endTz: (r.endTz || r.startTz) || undefined,
+    endTz: r.endTz || r.startTz || undefined,
   }));
 
   await api.createDayScheduleTemplate(props.dayId, { name, events });
@@ -530,7 +551,6 @@ const confirmSaveTemplate = async () => {
   saveTemplateOpen.value = false;
   emit("templateSaved");
 };
-
 
 const templatesList = computed<ScheduleTemplateLike[]>(() => props.templates ?? []);
 
@@ -561,7 +581,6 @@ const templateCreatedLabel = (t: ScheduleTemplateLike) => {
     year: "numeric",
   });
 };
-
 
 const templatePreviewEvents = (t: ScheduleTemplateLike) => {
   return Array.isArray(t.events) ? t.events : [];
@@ -606,7 +625,6 @@ const tzSplit = ref(false);
 const tzSearch = ref("");
 const saveTemplateOpen = ref(false);
 const templateName = ref("");
-
 
 const tzOptions = computed(() => {
   const base = [
@@ -668,7 +686,6 @@ const applyTz = () => {
 const route = useRoute();
 const tourId = computed(() => String(route.params.tourId));
 
-
 const { data: templatesData, refresh: refreshTemplates } = useAsyncData(
   () => `templates:${tourId.value}`,
   () => api.getTourScheduleTemplates(tourId.value),
@@ -676,7 +693,6 @@ const { data: templatesData, refresh: refreshTemplates } = useAsyncData(
 );
 
 const templates = computed(() => templatesData.value ?? []);
-
 </script>
 
 <style scoped>
@@ -1104,7 +1120,6 @@ const templates = computed(() => templatesData.value ?? []);
   cursor: pointer;
   justify-self: end;
 }
-
 
 .ttrow.active {
   background: rgba(37, 99, 235, 0.08);
